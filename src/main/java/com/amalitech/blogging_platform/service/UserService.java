@@ -6,14 +6,17 @@ import com.amalitech.blogging_platform.dao.PostDAO;
 import com.amalitech.blogging_platform.dao.UserDAO;
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
 import com.amalitech.blogging_platform.dao.enums.UserColumn;
+import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Service
 public class UserService {
   private final PasswordHashService passwordHashService;
   private final UserDAO userDAO;
@@ -30,14 +33,15 @@ public class UserService {
     this.reviewService = reviewService;
   }
 
-  public User create(User user){
-    String hashedPassword = this.passwordHashService.hash(user.getPassword().toCharArray());
-    user.setPassword(hashedPassword);
-    return this.userDAO.create(user);
+
+  public UserDTO.Out create(UserDTO.In user){
+    User createdUser = this.userDAO.create(this.mapToUser(user));
+
+    return this.mapToUserDTO(createdUser);
   }
 
-  public User get(Long id){
-    return this.userDAO.get(id);
+  public UserDTO.Out get(Long id){
+    return this.mapToUserDTO(this.userDAO.get(id));
   }
 
   public User login(String username, String password){
@@ -60,7 +64,7 @@ public class UserService {
   public User updatePassword(Long userId, String oldPassword, String newPassword){
     log.info("Update Password | new: {}", newPassword);
     log.info("Update Password | old: {}", oldPassword);
-    User user = this.get(userId);
+    User user = this.userDAO.get(userId);
     if (this.passwordHashService.verify(oldPassword.toCharArray(), user.getPassword())) {
       user.setPassword(this.passwordHashService.hash(newPassword.toCharArray()));
       return this.userDAO.update(userId, user);
@@ -91,5 +95,30 @@ public class UserService {
       return this.getUserStats(userId);
 
     return this.userDAO.getUserStats(userId);
+  }
+
+  private User mapToUser(UserDTO.In in){
+    User user = new User();
+    String hashedPassword = this.passwordHashService.hash(in.getPassword().toCharArray());
+    user.setFirstName(in.getFirstName());
+    user.setLastName(in.getLastName());
+    user.setUsername(in.getUsername());
+    user.setEmail(in.getEmail());
+    user.setPassword(hashedPassword);
+    return user;
+  }
+
+  private UserDTO.Out mapToUserDTO(User user){
+    UserDTO.Out out = new UserDTO.Out();
+    out.setId(user.getId());
+    out.setFirstName(user.getFirstName());
+    out.setLastName(user.getLastName());
+    out.setUsername(user.getUsername());
+    out.setEmail(user.getEmail());
+    out.setCreatedAt(user.getCreatedAt());
+    out.setUpdatedAt(user.getUpdatedAt());
+    out.setDeletedAt(user.getDeletedAt());
+    out.setDeleted(user.isDeleted());
+    return out;
   }
 }

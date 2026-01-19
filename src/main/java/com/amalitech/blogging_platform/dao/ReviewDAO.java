@@ -3,6 +3,7 @@ package com.amalitech.blogging_platform.dao;
 import com.amalitech.blogging_platform.model.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
  * Data Access Object (DAO) for Review entities.
  * Provides CRUD operations for post reviews/ratings with soft-delete support.
  */
+@Repository
 public class ReviewDAO implements DAO<Review, Long> {
 
   private final Logger log = LoggerFactory.getLogger(ReviewDAO.class);

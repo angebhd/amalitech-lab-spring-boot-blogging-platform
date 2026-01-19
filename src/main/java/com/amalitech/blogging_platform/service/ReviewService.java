@@ -1,12 +1,12 @@
 package com.amalitech.blogging_platform.service;
 
-
 import com.amalitech.blogging_platform.dao.ReviewDAO;
 import com.amalitech.blogging_platform.model.Review;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 @Service
 public class ReviewService {
 

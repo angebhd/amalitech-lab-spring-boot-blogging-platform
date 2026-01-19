@@ -6,9 +6,10 @@ import com.amalitech.blogging_platform.dao.CommentDAO;
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
 import com.amalitech.blogging_platform.model.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class CommentService {
   private final CommentDAO commentDAO;
 

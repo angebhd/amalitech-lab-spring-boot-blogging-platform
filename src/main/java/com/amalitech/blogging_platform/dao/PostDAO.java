@@ -7,6 +7,7 @@ import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Map;
  * but provide overloads to include them when needed (e.g. admin views, audit, recovery).
  * </p>
  */
+@Repository
 public class PostDAO implements DAO<Post, Long> {
 
   private final Logger log = LoggerFactory.getLogger(PostDAO.class);

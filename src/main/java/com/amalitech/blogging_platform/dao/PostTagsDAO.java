@@ -3,6 +3,7 @@ package com.amalitech.blogging_platform.dao;
 import com.amalitech.blogging_platform.model.PostTags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import java.util.List;
  * Note: This is a junction table with composite primary key (post_id, tag_id).
  * No single surrogate ID exists, and soft-delete is typically not used here.
  */
+@Repository
 public class PostTagsDAO implements DAO<PostTags, Long> {
 
   private final Logger log = LoggerFactory.getLogger(PostTagsDAO.class);

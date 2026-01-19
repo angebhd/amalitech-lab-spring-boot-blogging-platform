@@ -5,6 +5,7 @@ import com.amalitech.blogging_platform.dao.enums.UserColumn;
 import com.amalitech.blogging_platform.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.*;
@@ -17,6 +18,7 @@ import java.util.*;
  * but provide overloads to include them when needed (e.g. admin views, audit).
  * </p>
  */
+@Repository
 public class UserDAO implements DAO<User, Long> {
 
   private final Logger log = LoggerFactory.getLogger(UserDAO.class);
