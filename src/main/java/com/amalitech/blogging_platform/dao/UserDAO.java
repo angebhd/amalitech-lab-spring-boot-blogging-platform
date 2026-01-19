@@ -1,7 +1,7 @@
 package com.amalitech.blogging_platform.dao;
 
-
 import com.amalitech.blogging_platform.dao.enums.UserColumn;
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,12 +200,12 @@ public class UserDAO implements DAO<User, Long> {
    *
    * @param page     1-based page number
    * @param pageSize number of records per page
-   * @return paginated list of users
+   * @return paginated data of users
    * @throws RuntimeException if a database error occurs
    * @see #getAll(int, int, boolean)
    */
   @Override
-  public List<User> getAll(int page, int pageSize) {
+  public PaginatedData<User> getAll(int page, int pageSize) {
     return getAll(page, pageSize, false);
   }
 
@@ -215,34 +215,50 @@ public class UserDAO implements DAO<User, Long> {
    * @param page           1-based page number
    * @param pageSize       number of records per page
    * @param includeDeleted if {@code true}, includes soft-deleted users
-   * @return paginated list of users
+   * @return paginated data of users
    * @throws RuntimeException if a database error occurs
    */
-  public List<User> getAll(int page, int pageSize, boolean includeDeleted) {
+  public PaginatedData<User> getAll(int page, int pageSize, boolean includeDeleted) {
     int effectivePage = Math.max(page, 1);
     int effectivePageSize = Math.max(pageSize, 1);
     int offset = (effectivePage - 1) * effectivePageSize;
 
-    String sql = "SELECT * FROM users";
+    String countSql = "SELECT COUNT(*) FROM users";
     if (!includeDeleted) {
-      sql += " WHERE is_deleted = false";
+      countSql += " WHERE is_deleted = false";
     }
-    sql += """
+
+    String dataSql = "SELECT * FROM users";
+    if (!includeDeleted) {
+      dataSql += " WHERE is_deleted = false";
+    }
+    dataSql += """
                  ORDER BY created_at DESC
                  LIMIT ? OFFSET ?
             """;
 
     List<User> users = new ArrayList<>();
+    int total = 0;
 
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+    try (Connection conn = DatabaseConnection.getConnection()) {
 
-      ps.setInt(1, effectivePageSize);
-      ps.setInt(2, offset);
+      // Fetch total count
+      try (PreparedStatement countPs = conn.prepareStatement(countSql);
+           ResultSet countRs = countPs.executeQuery()) {
+        if (countRs.next()) {
+          total = countRs.getInt(1);
+        }
+      }
 
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          users.add(mapRowToUser(rs));
+      // Fetch paginated data
+      try (PreparedStatement dataPs = conn.prepareStatement(dataSql)) {
+        dataPs.setInt(1, effectivePageSize);
+        dataPs.setInt(2, offset);
+
+        try (ResultSet rs = dataPs.executeQuery()) {
+          while (rs.next()) {
+            users.add(mapRowToUser(rs));
+          }
         }
       }
 
@@ -252,15 +268,16 @@ public class UserDAO implements DAO<User, Long> {
       throw new RuntimeException("Failed to fetch users", e);
     }
 
-    return users;
+    int totalPages = (total + effectivePageSize - 1) / effectivePageSize;
+    return new PaginatedData<>(users, effectivePage, effectivePageSize, totalPages, total);
   }
 
   /**
    * Convenience method: returns first page (1) with 100 records, excluding deleted users.
    *
-   * @return list of up to 100 most recently created non-deleted users
+   * @return paginated data of up to 100 most recently created non-deleted users
    */
-  public List<User> getAll() {
+  public PaginatedData<User> getAll() {
     return getAll(1, 100, false);
   }
 

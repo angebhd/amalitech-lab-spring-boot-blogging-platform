@@ -2,6 +2,7 @@ package com.amalitech.blogging_platform.dao;
 
 
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.Comment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,12 +181,12 @@ public class CommentDAO implements DAO<Comment, Long> {
    *
    * @param page     1-based page number
    * @param pageSize number of records per page
-   * @return paginated list of comments
+   * @return paginated data of comments
    * @throws RuntimeException if a database error occurs
    * @see #getAll(int, int, boolean)
    */
   @Override
-  public List<Comment> getAll(int page, int pageSize) {
+  public PaginatedData<Comment> getAll(int page, int pageSize) {
     return getAll(page, pageSize, false);
   }
 
@@ -195,40 +196,56 @@ public class CommentDAO implements DAO<Comment, Long> {
    * @param page           1-based page number
    * @param pageSize       number of records per page
    * @param includeDeleted if {@code true}, includes soft-deleted comments
-   * @return paginated list of comments
+   * @return paginated data of comments
    * @throws RuntimeException if a database error occurs
    */
-  public List<Comment> getAll(int page, int pageSize, boolean includeDeleted) {
+  public PaginatedData<Comment> getAll(int page, int pageSize, boolean includeDeleted) {
     int effectivePage = Math.max(page, 1);
     int effectivePageSize = Math.max(pageSize, 1);
     int offset = (effectivePage - 1) * effectivePageSize;
 
-    String sql = """
+    String countSql = "SELECT COUNT(*) FROM comments";
+    if (!includeDeleted) {
+      countSql += " WHERE is_deleted = false";
+    }
+
+    String dataSql = """
                 SELECT id, post_id, user_id, body, parent_comment,
                        created_at, updated_at, is_deleted
                 FROM comments
             """;
 
     if (!includeDeleted) {
-      sql += " WHERE is_deleted = false";
+      dataSql += " WHERE is_deleted = false";
     }
 
-    sql += """
+    dataSql += """
                  ORDER BY created_at DESC
                  LIMIT ? OFFSET ?
             """;
 
     List<Comment> comments = new ArrayList<>();
+    int total = 0;
 
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (Connection connection = DatabaseConnection.getConnection()) {
 
-      ps.setInt(1, effectivePageSize);
-      ps.setInt(2, offset);
+      // Fetch total count
+      try (PreparedStatement countPs = connection.prepareStatement(countSql);
+           ResultSet countRs = countPs.executeQuery()) {
+        if (countRs.next()) {
+          total = countRs.getInt(1);
+        }
+      }
 
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          comments.add(mapRowToComment(rs));
+      // Fetch paginated data
+      try (PreparedStatement dataPs = connection.prepareStatement(dataSql)) {
+        dataPs.setInt(1, effectivePageSize);
+        dataPs.setInt(2, offset);
+
+        try (ResultSet rs = dataPs.executeQuery()) {
+          while (rs.next()) {
+            comments.add(mapRowToComment(rs));
+          }
         }
       }
 
@@ -238,15 +255,16 @@ public class CommentDAO implements DAO<Comment, Long> {
       throw new RuntimeException("Failed to fetch comments", e);
     }
 
-    return comments;
+    int totalPages = (total + effectivePageSize - 1) / effectivePageSize;
+    return new PaginatedData<>(comments, effectivePage, effectivePageSize, totalPages, total);
   }
 
   /**
    * Convenience method: first page (1), 100 records, excludes deleted comments.
    *
-   * @return list of up to 100 most recently created non-deleted comments
+   * @return paginated data of up to 100 most recently created non-deleted comments
    */
-  public List<Comment> getAll() {
+  public PaginatedData<Comment> getAll() {
     return getAll(1, 100, false);
   }
 

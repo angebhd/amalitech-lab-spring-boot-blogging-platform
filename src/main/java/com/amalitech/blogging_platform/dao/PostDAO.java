@@ -2,6 +2,7 @@ package com.amalitech.blogging_platform.dao;
 
 
 import com.amalitech.blogging_platform.dto.CommentDTO;
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.PostDTO;
 import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Tag;
@@ -124,12 +125,12 @@ public class PostDAO implements DAO<Post, Long> {
    *
    * @param page     1-based page number
    * @param pageSize number of records per page
-   * @return paginated list of posts
+   * @return paginated data of posts
    * @throws RuntimeException if a database error occurs
    * @see #getAll(int, int, boolean)
    */
   @Override
-  public List<Post> getAll(int page, int pageSize) {
+  public PaginatedData<Post> getAll(int page, int pageSize) {
     return getAll(page, pageSize, false);
   }
 
@@ -139,39 +140,55 @@ public class PostDAO implements DAO<Post, Long> {
    * @param page           1-based page number
    * @param pageSize       number of records per page
    * @param includeDeleted if {@code true}, includes soft-deleted posts
-   * @return paginated list of posts
+   * @return paginated data of posts
    * @throws RuntimeException if a database error occurs
    */
-  public List<Post> getAll(int page, int pageSize, boolean includeDeleted) {
+  public PaginatedData<Post> getAll(int page, int pageSize, boolean includeDeleted) {
     int effectivePage = Math.max(page, 1);
     int effectivePageSize = Math.max(pageSize, 1);
     int offset = (effectivePage - 1) * effectivePageSize;
 
-    String sql = """
+    String countSql = "SELECT COUNT(*) FROM posts";
+    if (!includeDeleted) {
+      countSql += " WHERE is_deleted = false";
+    }
+
+    String dataSql = """
                 SELECT id, author_id, title, body, created_at, updated_at, is_deleted
                 FROM posts
             """;
 
     if (!includeDeleted) {
-      sql += " WHERE is_deleted = false";
+      dataSql += " WHERE is_deleted = false";
     }
 
-    sql += """
+    dataSql += """
                  ORDER BY created_at DESC
                  LIMIT ? OFFSET ?
             """;
 
     List<Post> posts = new ArrayList<>();
+    int total = 0;
 
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement ps = connection.prepareStatement(sql)) {
+    try (Connection connection = DatabaseConnection.getConnection()) {
 
-      ps.setInt(1, effectivePageSize);
-      ps.setInt(2, offset);
+      // Fetch total count
+      try (PreparedStatement countPs = connection.prepareStatement(countSql);
+           ResultSet countRs = countPs.executeQuery()) {
+        if (countRs.next()) {
+          total = countRs.getInt(1);
+        }
+      }
 
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          posts.add(mapRowToPost(rs));
+      // Fetch paginated data
+      try (PreparedStatement ps = connection.prepareStatement(dataSql)) {
+        ps.setInt(1, effectivePageSize);
+        ps.setInt(2, offset);
+
+        try (ResultSet rs = ps.executeQuery()) {
+          while (rs.next()) {
+            posts.add(mapRowToPost(rs));
+          }
         }
       }
 
@@ -181,7 +198,8 @@ public class PostDAO implements DAO<Post, Long> {
       throw new RuntimeException("Failed to fetch posts", e);
     }
 
-    return posts;
+    int totalPages = (total + effectivePageSize - 1) / effectivePageSize;
+    return new PaginatedData<>(posts, effectivePage, effectivePageSize, totalPages, total);
   }
 
   /**
@@ -224,9 +242,9 @@ public class PostDAO implements DAO<Post, Long> {
   /**
    * Convenience method: first page (1), 100 records, excludes deleted posts.
    *
-   * @return list of up to 100 most recently created non-deleted posts
+   * @return paginated data of up to 100 most recently created non-deleted posts
    */
-  public List<Post> getAll() {
+  public PaginatedData<Post> getAll() {
     return getAll(1, 100, false);
   }
 
@@ -365,16 +383,16 @@ public class PostDAO implements DAO<Post, Long> {
   }
 
 
-    /**
-     *
-     * @param page
-     * @param pageSize
-     * @param search
-     * @param tagId
-     * @param authorId
-     * @param includeDeleted
-     * @return
-     */
+  /**
+   *
+   * @param page
+   * @param pageSize
+   * @param search
+   * @param tagId
+   * @param authorId
+   * @param includeDeleted
+   * @return
+   */
 
   public List<PostDTO> getPostDTOs(
           int page,

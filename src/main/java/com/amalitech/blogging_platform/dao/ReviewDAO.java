@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.dao;
 
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,15 +103,17 @@ public class ReviewDAO implements DAO<Review, Long> {
    *
    * @param page     the page number (1-based), defaults to 1 if ≤ 0
    * @param pageSize the number of records per page, defaults to 100 if ≤ 0
-   * @return list of reviews for the requested page (may be empty)
+   * @return paginated data of reviews for the requested page
    * @throws RuntimeException if a database error occurs
    */
   @Override
-  public List<Review> getAll(int page, int pageSize) {
+  public PaginatedData<Review> getAll(int page, int pageSize) {
 
     int effectivePage = Math.max(page, 1);
     int effectivePageSize = Math.max(pageSize, 1);
     int offset = (effectivePage - 1) * effectivePageSize;
+
+    String countSql = "SELECT COUNT(*) FROM reviews WHERE is_deleted = false";
 
     final String SELECT_ALL_PAGED = """
                 SELECT id, post_id, user_id, rate,
@@ -122,16 +125,27 @@ public class ReviewDAO implements DAO<Review, Long> {
             """;
 
     List<Review> reviews = new ArrayList<>();
+    int total = 0;
 
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement ps = connection.prepareStatement(SELECT_ALL_PAGED)) {
+    try (Connection connection = DatabaseConnection.getConnection()) {
 
-      ps.setInt(1, effectivePageSize);
-      ps.setInt(2, offset);
+      // Fetch total count
+      try (PreparedStatement countPs = connection.prepareStatement(countSql);
+           ResultSet countRs = countPs.executeQuery()) {
+        if (countRs.next()) {
+          total = countRs.getInt(1);
+        }
+      }
 
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          reviews.add(mapRowToReview(rs));
+      // Fetch paginated data
+      try (PreparedStatement ps = connection.prepareStatement(SELECT_ALL_PAGED)) {
+        ps.setInt(1, effectivePageSize);
+        ps.setInt(2, offset);
+
+        try (ResultSet rs = ps.executeQuery()) {
+          while (rs.next()) {
+            reviews.add(mapRowToReview(rs));
+          }
         }
       }
 
@@ -140,16 +154,17 @@ public class ReviewDAO implements DAO<Review, Long> {
       throw new RuntimeException("Failed to fetch reviews", e);
     }
 
-    return reviews;
+    int totalPages = (total + effectivePageSize - 1) / effectivePageSize;
+    return new PaginatedData<>(reviews, effectivePage, effectivePageSize, totalPages, total);
   }
 
   /**
    * Convenience method for getting the first page with default page size (100).
    *
-   * @return list of up to 100 most recently created non-deleted reviews
+   * @return paginated data of up to 100 most recently created non-deleted reviews
    * @throws RuntimeException if a database error occurs
    */
-  public List<Review> getAll() {
+  public PaginatedData<Review> getAll() {
     return getAll(1, 100);
   }
 

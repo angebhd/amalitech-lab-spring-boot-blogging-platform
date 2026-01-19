@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.dao;
 
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.PostTags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,15 +83,17 @@ public class PostTagsDAO implements DAO<PostTags, Long> {
    *
    * @param page     page number (1-based), defaults to 1 if ≤ 0
    * @param pageSize number of records per page, defaults to 100 if ≤ 0
-   * @return list of post-tag associations
+   * @return paginated data of post-tag associations
    * @throws RuntimeException if a database error occurs
    */
   @Override
-  public List<PostTags> getAll(int page, int pageSize) {
+  public PaginatedData<PostTags> getAll(int page, int pageSize) {
 
     int effectivePage = Math.max(page, 1);
     int effectivePageSize = Math.max(pageSize, 1);
     int offset = (effectivePage - 1) * effectivePageSize;
+
+    String countSql = "SELECT COUNT(*) FROM post_tags";
 
     final String SELECT_ALL_PAGED = """
                 SELECT post_id, tag_id
@@ -100,16 +103,27 @@ public class PostTagsDAO implements DAO<PostTags, Long> {
             """;
 
     List<PostTags> associations = new ArrayList<>();
+    int total = 0;
 
-    try (Connection connection = DatabaseConnection.getConnection();
-         PreparedStatement ps = connection.prepareStatement(SELECT_ALL_PAGED)) {
+    try (Connection connection = DatabaseConnection.getConnection()) {
 
-      ps.setInt(1, effectivePageSize);
-      ps.setInt(2, offset);
+      // Fetch total count
+      try (PreparedStatement countPs = connection.prepareStatement(countSql);
+           ResultSet countRs = countPs.executeQuery()) {
+        if (countRs.next()) {
+          total = countRs.getInt(1);
+        }
+      }
 
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          associations.add(mapRowToPostTags(rs));
+      // Fetch paginated data
+      try (PreparedStatement ps = connection.prepareStatement(SELECT_ALL_PAGED)) {
+        ps.setInt(1, effectivePageSize);
+        ps.setInt(2, offset);
+
+        try (ResultSet rs = ps.executeQuery()) {
+          while (rs.next()) {
+            associations.add(mapRowToPostTags(rs));
+          }
         }
       }
 
@@ -119,13 +133,14 @@ public class PostTagsDAO implements DAO<PostTags, Long> {
       throw new RuntimeException("Failed to fetch post-tag associations", e);
     }
 
-    return associations;
+    int totalPages = (total + effectivePageSize - 1) / effectivePageSize;
+    return new PaginatedData<>(associations, effectivePage, effectivePageSize, totalPages, total);
   }
 
   /**
    * Convenience method — first page, default size 100.
    */
-  public List<PostTags> getAll() {
+  public PaginatedData<PostTags> getAll() {
     return getAll(1, 100);
   }
 
