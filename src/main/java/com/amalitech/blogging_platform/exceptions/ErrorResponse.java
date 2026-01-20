@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.exceptions;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import java.util.Date;
 import java.util.Map;
 
 @Setter
+@Getter // !For Jackson in deserializatin!
 @NoArgsConstructor
 public class ErrorResponse {
   private String message;
