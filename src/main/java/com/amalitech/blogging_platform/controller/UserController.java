@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.controller;
 
 import com.amalitech.blogging_platform.dto.GenericResponse;
+import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.service.UserService;
@@ -10,14 +11,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
 @Tag(name = "Users", description = "Manage users (Add, delete, update and delete)")
@@ -31,17 +32,26 @@ public class UserController {
   }
 
   @GetMapping()
-  public GenericResponse<PaginatedData<UserDTO.Out>> getUsers(Pageable pageable){
-    return null;
+  @Operation(summary = "Get a users in a paginated format")
+  @ApiResponse(responseCode= "200", description = "Users retrieved")
+  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+
+  public ResponseEntity<GenericResponse<PaginatedData<UserDTO.Out>>> getUsers(@ModelAttribute PageRequest pageRequest){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(pageRequest));
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("{id}")
-  public GenericResponse<UserDTO.Out> getUser(@PathVariable Long id){
-    UserDTO.Out userDTO = new UserDTO.Out();
-    if(userDTO == null){
-      return new GenericResponse<>(HttpStatus.NOT_FOUND, "Not found", null);
-    }
-    return new GenericResponse<>(HttpStatus.ACCEPTED , "Sucess", userDTO);
+  @Operation(summary = "Get a specific user")
+  @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<UserDTO.Out>> getUser(@PathVariable Long id){
+    GenericResponse<UserDTO.Out> response = new GenericResponse<>(HttpStatus.OK, this.userService.get(id));
+    return new ResponseEntity<>(response, HttpStatus.OK);
+
   }
 
   @PostMapping()
@@ -56,16 +66,26 @@ public class UserController {
   }
 
 
-  @PutMapping()
-  public GenericResponse<UserDTO.Out> update(){
-    return null;
+  @PutMapping("{id}")
+  @Operation(summary = "Update  a user")
+  @ApiResponse(responseCode= "200", description = "User updated")
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<UserDTO.Out>> update(@PathVariable Long id, @RequestBody @Valid UserDTO.In in){
+    GenericResponse<UserDTO.Out> resp = new GenericResponse<>(HttpStatus.OK, this.userService.update(id, in));
+    return ResponseEntity.ok(resp);
   }
 
+  @DeleteMapping("{id}")
+  @Operation(summary = "Delete  a user")
+  @ApiResponse(responseCode= "200", description = "User deleted")
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
 
-  @DeleteMapping()
-  public GenericResponse<UserDTO.Out> delete(){
-    return null;
+  public ResponseEntity<GenericResponse<UserDTO.Out>> delete(@PathVariable Long id){
+    this.userService.delete(id);
+    GenericResponse<UserDTO.Out> resp = new GenericResponse<>(HttpStatus.OK, "User deleted", null);
+    return ResponseEntity.status(HttpStatusCode.valueOf(resp.getStatusCode())).body(resp);
   }
-
 
 }

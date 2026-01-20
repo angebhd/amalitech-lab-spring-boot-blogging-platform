@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Tag extends  BaseEntity{
+public class Tag extends BaseEntity{
   private Long id;
   private String name;
 }

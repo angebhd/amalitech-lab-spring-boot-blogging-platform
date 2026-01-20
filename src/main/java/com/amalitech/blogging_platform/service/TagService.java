@@ -1,6 +1,10 @@
 package com.amalitech.blogging_platform.service;
 
 import com.amalitech.blogging_platform.dao.TagDAO;
+import com.amalitech.blogging_platform.dto.PageRequest;
+import com.amalitech.blogging_platform.dto.PaginatedData;
+import com.amalitech.blogging_platform.exceptions.DataConflictException;
+import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +22,8 @@ public class TagService {
     this.tagDAO = tagDAO;
     this.postTagsService = postTagsService;
   }
-  public List<Tag> getAll(){
-    return this.tagDAO.getAll();
+  public PaginatedData<Tag> get(PageRequest pageRequest){
+    return this.tagDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
   }
 
 
@@ -36,9 +40,26 @@ public class TagService {
     Tag t = new Tag();
     t.setName(name);
     if (exist != null){
-      return exist;
+      throw new DataConflictException("Tag name already exists");
     }
    return this.tagDAO.create(t);
+  }
+
+  public Tag update(Long id, String name){
+    Tag exist = this.tagDAO.get(id);
+    if (exist == null){
+      throw new RessourceNotFoundException("Tag id not found");
+    }
+    Tag existing = this.tagDAO.get(name);
+    if (existing != null){
+      throw new DataConflictException("Tag name already exists");
+    }
+
+    return this.tagDAO.update(id, exist);
+  }
+
+  public void delete(Long id){
+    this.tagDAO.delete(id);
   }
 
   public void updatePostTags(Long postId, List<String> tags){

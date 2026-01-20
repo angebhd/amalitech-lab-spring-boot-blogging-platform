@@ -6,7 +6,10 @@ import com.amalitech.blogging_platform.dao.PostDAO;
 import com.amalitech.blogging_platform.dao.UserDAO;
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
 import com.amalitech.blogging_platform.dao.enums.UserColumn;
+import com.amalitech.blogging_platform.dto.PageRequest;
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
+import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +44,21 @@ public class UserService {
   }
 
   public UserDTO.Out get(Long id){
-    return this.mapToUserDTO(this.userDAO.get(id));
+    User response = this.userDAO.get(id);
+    if(response == null)
+      throw new RessourceNotFoundException("User not found");
+    return this.mapToUserDTO(response);
+  }
+
+  public PaginatedData<UserDTO.Out> get(PageRequest pageRequest){
+    PaginatedData<User> response = this.userDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
+    PaginatedData<UserDTO.Out> paginatedData = new PaginatedData<>();
+    paginatedData.setItems(response.getItems().stream().map(this::mapToUserDTO).toList());
+    paginatedData.setPage(response.getPage());
+    paginatedData.setPageSize(response.getPageSize());
+    paginatedData.setTotal(response.getTotal());
+    paginatedData.setTotalPages(response.getTotalPages());
+    return paginatedData;
   }
 
   public User login(String username, String password){
@@ -55,10 +72,10 @@ public class UserService {
     return null;
   }
 
-  public User update(Long id, User user){
+  public UserDTO.Out update(Long id, UserDTO.In user){
     User oldUser = this.userDAO.get(id);
     user.setPassword(oldUser.getPassword());
-    return this.userDAO.update(id, user);
+    return this.mapToUserDTO(this.userDAO.update(id, this.mapToUser(user)));
   }
 
   public User updatePassword(Long userId, String oldPassword, String newPassword){
@@ -73,7 +90,7 @@ public class UserService {
   }
 
   public boolean delete (Long id){
-    return  this.userDAO.delete(id);
+    return this.userDAO.delete(id);
   }
 
   public Map<String, Integer> getUserStats(Long userId){
@@ -121,4 +138,6 @@ public class UserService {
     out.setDeleted(user.isDeleted());
     return out;
   }
+
+
 }
