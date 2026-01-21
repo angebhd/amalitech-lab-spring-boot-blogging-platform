@@ -1,3 +1,15 @@
+
 spring:
   application:
     name: Blogging platform
+  profiles:
+    active: dev
+  graphql:
+    graphiql:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enable: false

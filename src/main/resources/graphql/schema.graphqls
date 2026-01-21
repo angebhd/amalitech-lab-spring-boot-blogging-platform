@@ -1,12 +1,9 @@
-type User {
-    id: ID
-    username: String
+type Query{
+}
 
-}
-input UserInput {
-    username: String!
-}
-type Query {
-    users(user: UserInput) : [User]
-    user(username: String) :User
+interface Paginated{
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
 }

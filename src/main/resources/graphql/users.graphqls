@@ -1,0 +1,29 @@
+extend type Query {
+    users(page : Int, size : Int): UserPaginated
+    userById(id: Int): User
+    userByUsername(username: String): User
+}
+
+
+# User related types
+type User {
+    id: ID
+    username: String
+    firstName: String
+    lastName: String
+    email: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+}
+type UserPaginated implements Paginated{
+    items: [User]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+
+}
+
+

@@ -5,6 +5,7 @@ import com.amalitech.blogging_platform.dao.CommentDAO;
 import com.amalitech.blogging_platform.dao.PostDAO;
 import com.amalitech.blogging_platform.dao.UserDAO;
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
+import com.amalitech.blogging_platform.dao.enums.UserColumn;
 import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
@@ -43,6 +44,13 @@ public class UserService {
       throw new RessourceNotFoundException("User not found");
     return this.mapToUserDTO(response);
   }
+
+  public UserDTO.Out getByUsername(String username){
+    var response = this.userDAO.getBy(username, UserColumn.USERNAME, false);
+
+    if(response == null)
+      throw new RessourceNotFoundException("User not found");
+    return this.mapToUserDTO(response);  }
 
   public PaginatedData<UserDTO.Out> get(PageRequest pageRequest){
     PaginatedData<User> response = this.userDAO.getAll(pageRequest.getPage(), pageRequest.getSize());

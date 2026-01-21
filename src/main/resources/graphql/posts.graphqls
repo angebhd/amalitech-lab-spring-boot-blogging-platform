@@ -1,0 +1,23 @@
+extend type Query {
+    posts(page:Int, size:Int): PaginatedPost
+    postById(id: Int): Post
+    postByAuthorId(page:Int , size:Int, id: Int): PaginatedPost
+    postSearch(page:Int , size:Int, keyword: String, tagId: Int):PaginatedPost
+}
+type Post {
+    id: ID
+    author: User
+    title: String
+    body: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+}
+type PaginatedPost implements Paginated{
+    items: [Post]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+}
