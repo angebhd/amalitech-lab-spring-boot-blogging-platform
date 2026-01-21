@@ -50,7 +50,6 @@ public class UserController {
   public ResponseEntity<GenericResponse<UserDTO.Out>> getUser(@PathVariable Long id){
     GenericResponse<UserDTO.Out> response = new GenericResponse<>(HttpStatus.OK, this.userService.get(id));
     return new ResponseEntity<>(response, HttpStatus.OK);
-
   }
 
   @PostMapping()
