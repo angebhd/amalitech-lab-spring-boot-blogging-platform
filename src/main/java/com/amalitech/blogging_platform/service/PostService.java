@@ -1,6 +1,5 @@
 package com.amalitech.blogging_platform.service;
 
-
 import com.amalitech.blogging_platform.dao.PostDAO;
 import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
 
 @Service
 public class PostService {
@@ -22,21 +20,14 @@ public class PostService {
   private final PostDAO postDAO;
   private final TagService tagService;
   private final PostTagsService postTagsService;
-  private final UserService userService;
-  private final ReviewService reviewService;
-  private final CommentService commentService;
   private final Logger log = LoggerFactory.getLogger(PostService.class);
-  private Map<String, List<PostDTO>> cachedPostDTOs = new HashMap<>();
-  private final Map<Long, List<Post>> cachedPostByAuthor = new HashMap<>();
 
   @Autowired
-  public PostService(PostDAO postDAO, TagService tagService, PostTagsService postTagsService ,UserService userService, ReviewService reviewService, CommentService commentService) {
+  public PostService(PostDAO postDAO, TagService tagService, PostTagsService postTagsService) {
     this.postDAO = postDAO;
     this.tagService = tagService;
     this.postTagsService = postTagsService;
-    this.userService = userService;
-    this.reviewService = reviewService;
-    this.commentService = commentService;
+
   }
 
   public PostDTO.Out create(PostDTO.In post){
@@ -55,14 +46,10 @@ public class PostService {
         this.postTagsService.create(newPost.getId(), t.getId());
       }
     });
-
-    this.cachedPostDTOs = new HashMap<>();
-    this.cachedPostByAuthor.remove(post.getAuthorId());
     return  this.mapToDTO(newPost);
   }
 
   public PostDTO.Out update(Long id, PostDTO.In post){
-    this.cachedPostByAuthor.remove(post.getAuthorId());
     return this.mapToDTO(this.postDAO.update(id, this.mapToEntity(post)));
   }
 
@@ -70,84 +57,14 @@ public class PostService {
     this.postDAO.delete(id);
   }
 
-//  public List<PostDTO> loadFeed() {
-//    return this.loadFeed(1, 20);
-//  }
-//    public List<PostDTO> loadFeed(int page, int pageSize){
-//    List<Post> posts = this.postDAO.getAll(page, pageSize);
-//    List<PostDTO> postDetails = new ArrayList<>();
-//
-//    posts.forEach(post -> {
-//      PostDTO dto = new PostDTO();
-//      dto.setPost(post);
-//      var author = this.userService.get(post.getAuthorId());
-//      dto.setAuthorId(author.getId());
-//      dto.setAuthorName(author.getFirstName() + " " + author.getLastName());
-//
-//      List<Long> tagsId = this.postTagsService.getTagsIdByPostId(post.getId());
-//      List<Tag> tags = new ArrayList<>();
-//      tagsId.forEach(a -> tags.add(this.tagService.get(a)) );
-//      dto.setTags(tags);
-//
-//      dto.setReviews(this.reviewService.getByPostId(post.getId()));
-//      this.commentService.getByPostId(post.getId());
-//      postDetails.add(dto);
-//    });
-//      this.cachedPostDTOs = new HashMap<>();
-//    return  postDetails;
-//  }
-
-//  public List<PostDTO> loadFeed(boolean withPerformance) {
-//    return loadFeed(1, 20, withPerformance);
-//  }
-//
-//  public List<PostDTO> loadFeed(int page, int pageSize, boolean withPerformance){
-//    if (!withPerformance)
-//      return loadFeed();
-//    if(this.cachedPostDTOs.get(this.makeCacheKeyforLoadFeed(page, pageSize))!= null)
-//      return this.cachedPostDTOs.get(this.makeCacheKeyforLoadFeed(page, pageSize));
-//
-//    var res = this.postDAO.getPostDTOs(page, pageSize, null, null, null, false );
-//    this.cachedPostDTOs.put(makeCacheKeyforLoadFeed(page, pageSize), res);
-//    return res;
-//  }
-
-  public List<PostDTO> search(int page, int pageSize, String search, Long tagId){
-    return this.postDAO.getPostDTOs(page, pageSize, search, tagId, null, false );
-  }
-
-//  public PostDTO loadById(Long id){
-//    Post post = this.postDAO.get(id);
-//
-//    PostDTO dto = new PostDTO();
-//    dto.setPost(post);
-//    var author = this.userService.get(post.getAuthorId());
-//    dto.setAuthorName(author.getFirstName() + " " + author.getLastName());
-//    List<Long> tagsId = this.postTagsService.getTagsIdByPostId(post.getId());
-//    List<Tag> tags = new ArrayList<>();
-//    tagsId.forEach(a -> tags.add(this.tagService.get(a)) );
-//    dto.setTags(tags);
-//
-//    dto.setReviews(this.reviewService.getByPostId(post.getId()));
-//    this.commentService.getByPostId(post.getId());
-//
-//    return  dto;
-//  }
-
-  public Post getById(Long id){
-    return this.postDAO.get(id);
+  public PaginatedData<PostDTO.Detailed> search(PageRequest pageRequest, String search, Long tagId, Long authorId){
+    return this.postDAO.getPostDTOs(pageRequest.getPage(), pageRequest.getSize(), search, tagId, authorId, false );
   }
 
   public PaginatedData<PostDTO.Out> get (PageRequest pageRequest){
     PaginatedData<Post> res = this.postDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
-    PaginatedData<PostDTO.Out> dto = new PaginatedData<>();
-    dto.setPage(res.getPage());
-    dto.setPageSize(res.getPageSize());
-    dto.setTotal(res.getTotal());
-    dto.setTotalPages(res.getTotalPages());
-    dto.setItems(res.getItems().stream().map(this::mapToDTO).toList());
 
-    return dto;
+    return this.mapToDTO(res);
   }
 
   public PostDTO.Out get(Long id){
@@ -158,23 +75,21 @@ public class PostService {
     return this.mapToDTO(post);
   }
 
-  public List<Post> getByAuthorId(Long id){
-    return this.postDAO.getByAuthorId(id);
-  }
-
-  public List<Post> getByAuthorId(Long id, boolean withPerformance){
-    if(!withPerformance)
-      return this.postDAO.getByAuthorId(id);
-
-    if ( cachedPostByAuthor.get(id) == null) {
-      var posts = this.postDAO.getByAuthorId(id);
-      cachedPostByAuthor.put(id, posts);
+  public PostDTO.Detailed getDetailed(Long id){
+    PostDTO.Detailed post = this.postDAO.getPostDTO(id, false);
+    if(post == null){
+      throw new RessourceNotFoundException("Post not found");
     }
-    return this.cachedPostByAuthor.get(id);
+    return post;
   }
 
-  private String makeCacheKeyforLoadFeed(int page, int pageSize){
-    return page+"~"+pageSize;
+  public PaginatedData<PostDTO.Out> getByAuthorId(Long id){
+    return this.getByAuthorId(id, new PageRequest(1,10) );
+  }
+
+  public PaginatedData<PostDTO.Out> getByAuthorId(Long id, PageRequest pageRequest){
+      return this.mapToDTO(this.postDAO.getByAuthorId(id, pageRequest.getPage(), pageRequest.getSize()));
+
   }
 
   private PostDTO.Out mapToDTO(Post post){
@@ -187,6 +102,7 @@ public class PostService {
     dto.setUpdatedAt(post.getUpdatedAt());
     dto.setDeletedAt(post.getDeletedAt());
     dto.setDeleted(post.isDeleted());
+
     return dto;
   }
 
@@ -195,6 +111,18 @@ public class PostService {
     post.setAuthorId(in.getAuthorId());
     post.setTitle(in.getTitle());
     post.setBody(in.getBody());
+
     return post;
+  }
+
+  private PaginatedData<PostDTO.Out> mapToDTO(PaginatedData<Post> posts){
+    PaginatedData<PostDTO.Out> dto = new PaginatedData<>();
+    dto.setPage(posts.getPage());
+    dto.setPageSize(posts.getPageSize());
+    dto.setTotal(posts.getTotal());
+    dto.setTotalPages(posts.getTotalPages());
+    dto.setItems(posts.getItems().stream().map(this::mapToDTO).toList());
+
+    return dto;
   }
 }
