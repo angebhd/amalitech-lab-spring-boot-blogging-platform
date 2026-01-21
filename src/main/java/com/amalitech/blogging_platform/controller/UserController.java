@@ -36,7 +36,6 @@ public class UserController {
   @ApiResponse(responseCode= "200", description = "Users retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-
   public ResponseEntity<GenericResponse<PaginatedData<UserDTO.Out>>> getUsers(@ModelAttribute PageRequest pageRequest){
     var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(pageRequest));
     return ResponseEntity.ok(response);
