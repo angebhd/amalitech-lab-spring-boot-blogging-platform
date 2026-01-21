@@ -54,7 +54,7 @@ public class TagService {
     if (existing != null){
       throw new DataConflictException("Tag name already exists");
     }
-
+    exist.setName(name);
     return this.tagDAO.update(id, exist);
   }
 

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
-@Tag(name = "Users", description = "Manage users (Add, delete, update and delete)")
+@Tag(name = "Users", description = "Manage users (Add, retrieve, update and delete)")
 public class UserController {
 
   private final UserService userService;

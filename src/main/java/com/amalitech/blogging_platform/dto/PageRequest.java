@@ -15,4 +15,9 @@ public class PageRequest {
   @Schema(description = "page size", defaultValue = "10")
   @Positive(message = "Page size should be a positive number, greater than 0")
   private int size = 10;
+
+  public PageRequest(int page, int size) {
+    this.page = page;
+    this.size = size;
+  }
 }

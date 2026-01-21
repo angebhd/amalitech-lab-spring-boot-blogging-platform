@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/review")
-@Tag(name = "Reviews", description = "Manage Reviews (Add, delete, update and delete)")
+@Tag(name = "Reviews", description = "Manage Reviews (Add, retrieve, update and delete)")
 public class ReviewController {
 
-  private ReviewService reviewService;
+  private final ReviewService reviewService;
 
   @Autowired
   public ReviewController(ReviewService reviewService) {

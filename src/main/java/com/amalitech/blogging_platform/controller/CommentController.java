@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/comment")
-@Tag(name = "Comments", description = "Manage commenents (Add, delete, update and delete)")
+@Tag(name = "Comments", description = "Manage commenents (Add, retrieve, update and delete)")
 public class CommentController {
 
-  private CommentService commentService;
+  private final CommentService commentService;
 
   @Autowired
   public CommentController(CommentService commentService) {
@@ -74,7 +74,7 @@ public class CommentController {
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<Object>> delete(@PathVariable Long id){
     this.commentService.delete(id);
-    var resp = new GenericResponse<Object>(HttpStatus.OK, "Post deleted", null);
+    var resp = new GenericResponse<>(HttpStatus.OK, "Post deleted", null);
     return ResponseEntity.status(HttpStatusCode.valueOf(resp.getStatusCode())).body(resp);
   }
 }

@@ -18,12 +18,14 @@ public class CustomExceptionHandler {
   @ExceptionHandler(RessourceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleNotFoundExceotion(RessourceNotFoundException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(DataConflictException.class)
   public ResponseEntity<ErrorResponse> handleConflictException(DataConflictException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.CONFLICT);
   }
 
@@ -33,6 +35,7 @@ public class CustomExceptionHandler {
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult().getFieldErrors().forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
     response.setDescription(errors);
+    log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 

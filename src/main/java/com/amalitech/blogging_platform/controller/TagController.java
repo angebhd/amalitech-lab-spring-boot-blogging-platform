@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/tag")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "Manage tags (Add, delete, update and delete)")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "Manage tags (Add, retrieve, update and delete)")
 public class TagController {
   private final TagService tagService;
 
@@ -55,7 +55,7 @@ public class TagController {
   }
 
   @PutMapping("{id}")
-  @Operation(summary = "Create tags")
+  @Operation(summary = "Update tags")
   @ApiResponse(responseCode= "200", description = "Tags updateg")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -69,7 +69,7 @@ public class TagController {
   @ApiResponse(responseCode= "201", description = "Tags created")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<?>> delete(@PathVariable Long id){
+  public ResponseEntity<GenericResponse<Object>> delete(@PathVariable Long id){
     this.tagService.delete(id);
     var response = new GenericResponse<>(HttpStatus.OK, "Tag sucessfully deleted",null);
     return ResponseEntity.status(HttpStatus.OK).body(response);

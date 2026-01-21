@@ -5,19 +5,15 @@ import com.amalitech.blogging_platform.dao.CommentDAO;
 import com.amalitech.blogging_platform.dao.PostDAO;
 import com.amalitech.blogging_platform.dao.UserDAO;
 import com.amalitech.blogging_platform.dao.enums.CommentColumn;
-import com.amalitech.blogging_platform.dao.enums.UserColumn;
 import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -26,7 +22,6 @@ public class UserService {
   private final PostDAO postDAO;
   private final CommentDAO commentDAO;
   private final ReviewService reviewService;
-  private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   public UserService(PasswordHashService passwordHashService, UserDAO userDAO, PostDAO postDAO, CommentDAO commentDAO, ReviewService reviewService) {
     this.passwordHashService = passwordHashService;
@@ -39,7 +34,6 @@ public class UserService {
 
   public UserDTO.Out create(UserDTO.In user){
     User createdUser = this.userDAO.create(this.mapToUser(user));
-
     return this.mapToUserDTO(createdUser);
   }
 
@@ -61,16 +55,6 @@ public class UserService {
     return paginatedData;
   }
 
-  public User login(String username, String password){
-    Optional<User> user = this.userDAO.findOneBy(username, UserColumn.USERNAME);
-    if (user.isPresent()){
-      boolean match = this.passwordHashService.verify(password.toCharArray(), user.get().getPassword());
-      user.get().setPassword(null);
-      if (match)
-        return user.get();
-    }
-    return null;
-  }
 
   public UserDTO.Out update(Long id, UserDTO.In user){
     User oldUser = this.userDAO.get(id);
@@ -78,16 +62,6 @@ public class UserService {
     return this.mapToUserDTO(this.userDAO.update(id, this.mapToUser(user)));
   }
 
-  public User updatePassword(Long userId, String oldPassword, String newPassword){
-    log.info("Update Password | new: {}", newPassword);
-    log.info("Update Password | old: {}", oldPassword);
-    User user = this.userDAO.get(userId);
-    if (this.passwordHashService.verify(oldPassword.toCharArray(), user.getPassword())) {
-      user.setPassword(this.passwordHashService.hash(newPassword.toCharArray()));
-      return this.userDAO.update(userId, user);
-    }
-    throw new RuntimeException("Invalid password");
-  }
 
   public boolean delete (Long id){
     return this.userDAO.delete(id);
@@ -95,7 +69,7 @@ public class UserService {
 
   public Map<String, Integer> getUserStats(Long userId){
     Map<String, Integer> response = new HashMap<>();
-    int postsCount = postDAO.getByAuthorId(userId).size();
+    int postsCount = postDAO.getByAuthorId(userId, 1, Integer.MAX_VALUE).getItems().size();
     response.put("postCount", postsCount);
 
     int commentsCount = this.commentDAO.findBy(String.valueOf(userId), CommentColumn.USER_ID, false).size();
