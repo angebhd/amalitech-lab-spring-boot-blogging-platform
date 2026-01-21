@@ -1,0 +1,23 @@
+extend type Query {
+    reviews(page: Int, size: Int): PaginatedReview
+    reviewById(id:ID): Review
+}
+
+type Review{
+    id:ID
+    post: Post
+    user: User
+    rate: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+}
+
+type PaginatedReview implements Paginated{
+    items: [Review]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+}

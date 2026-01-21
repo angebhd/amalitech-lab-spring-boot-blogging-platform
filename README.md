@@ -120,3 +120,5 @@ The platform follows a layered architecture to ensure separation of concerns:
    psql -d blogging -f docs/feedDB.sql
    ```
 
+Graph error handling
+DTOs: validation & Documentation

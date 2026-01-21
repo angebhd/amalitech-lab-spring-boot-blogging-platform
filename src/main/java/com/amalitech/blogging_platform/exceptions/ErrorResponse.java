@@ -19,6 +19,9 @@ public class ErrorResponse {
     this.message = message;
     this.path = path;
   }
+  public ErrorResponse(String message) {
+    this.message = message;
+  }
 
   public ErrorResponse(String message,String path, Map<String, String> description) {
     this.message = message;

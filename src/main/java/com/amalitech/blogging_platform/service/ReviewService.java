@@ -26,6 +26,10 @@ public class ReviewService {
   }
 
   public Review get(Long id) {
+    var review = this.reviewDAO.get(id);
+    if(review == null)
+      throw new RessourceNotFoundException("Review not found");
+
     return this.reviewDAO.get(id);
   }
 

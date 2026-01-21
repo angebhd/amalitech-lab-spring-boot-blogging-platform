@@ -49,6 +49,9 @@ public class PostGController {
 
   @SchemaMapping(typeName = "Post", field = "author")
   public UserDTO.Out author(PostDTO.GraphQL graphQL) {
+    if (graphQL == null)
+      return null;
+
     log.debug("Gettting author for id {}", graphQL.getAuthorId());
     return this.userService.get(graphQL.getAuthorId());
   }

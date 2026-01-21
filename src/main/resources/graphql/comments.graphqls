@@ -1,0 +1,24 @@
+extend type Query {
+    comments(page:Int, size: Int): PaginatedComment
+    commentById(id:ID): Comment
+}
+
+type Comment{
+    id:ID
+    post: Post
+    user: User
+    body: String
+    parent: Comment
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+}
+
+type PaginatedComment implements Paginated{
+    items:[Comment]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+}

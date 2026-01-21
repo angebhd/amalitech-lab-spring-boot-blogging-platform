@@ -1,0 +1,51 @@
+package com.amalitech.blogging_platform.graphql;
+
+import com.amalitech.blogging_platform.dto.*;
+import com.amalitech.blogging_platform.service.CommentService;
+import com.amalitech.blogging_platform.service.PostService;
+import com.amalitech.blogging_platform.service.UserService;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class CommentGController {
+  private final CommentService commentService;
+  private final UserService userService;
+  private final PostService postService;
+  public CommentGController(CommentService commentService, UserService userService, PostService postService) {
+    this.commentService = commentService;
+    this.userService = userService;
+    this.postService = postService;
+  }
+
+  @QueryMapping
+  public PaginatedData<CommentDTO.GraphQL> comments(@Argument Integer page, @Argument Integer size) {
+    return CommentDTO.Converter.toGraphQL(this.commentService.get(new PageRequest(page, size)));
+  }
+
+  @QueryMapping
+  public CommentDTO.GraphQL commentById(@Argument Long id) {
+    return CommentDTO.Converter.toGraphQL(this.commentService.get(id));
+  }
+
+  @SchemaMapping(typeName = "Comment", field = "user")
+  public UserDTO.Out user(CommentDTO.GraphQL graphQL) {
+    return this.userService.get(graphQL.getUserId());
+  }
+  @SchemaMapping(typeName = "Comment", field = "post")
+  public PostDTO.GraphQL post(CommentDTO.GraphQL graphQL) {
+    return PostDTO.Converter.toGraphQL(this.postService.get(graphQL.getPostId()));
+  }
+
+  @SchemaMapping(typeName = "Comment", field = "parent")
+  public CommentDTO.GraphQL comment(CommentDTO.GraphQL graphQL) {
+    try{
+      return CommentDTO.Converter.toGraphQL(this.commentService.get(graphQL.getParentCommentId()));
+    }catch(Exception ignored){ // if no parent, just return null
+      return null;
+    }
+  }
+
+}

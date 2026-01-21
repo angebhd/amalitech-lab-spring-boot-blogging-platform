@@ -1,0 +1,20 @@
+extend type Query {
+    tags(page: Int, size:Int): TagPaginated
+    tagById(id:Int): Tag
+}
+
+type Tag{
+    id:ID
+    name: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+}
+type TagPaginated implements Paginated{
+    items: [Tag]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+}
