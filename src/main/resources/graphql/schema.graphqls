@@ -1,5 +1,6 @@
-type Query{
-}
+type Query{}
+
+type Mutation{}
 
 interface Paginated{
     page: Int

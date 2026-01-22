@@ -4,9 +4,19 @@ extend type Query {
     postByAuthorId(page:Int , size:Int, id: Int): PaginatedPost
     postSearch(page:Int , size:Int, keyword: String, tagId: Int):PaginatedPost
 }
+
+extend type Mutation {
+    createPost(input: PostInput!): Post
+    updatePost(id: ID!, input: PostInput!): Post
+    deletePost(id: ID!): Post
+}
+
 type Post {
     id: ID
     author: User
+    reviews: [Review]
+    comments: [Comment]
+    Tags: [Tag]
     title: String
     body: String
     createdAt: String
@@ -14,10 +24,18 @@ type Post {
     deletedAt: String
     isDeleted: Boolean
 }
+
 type PaginatedPost implements Paginated{
     items: [Post]
     page: Int
     pageSize: Int
     total: Int
     totalPages: Int
+}
+
+input PostInput {
+    authorId: ID!
+    title: String!
+    body: String!
+    tags: [String]
 }

@@ -3,6 +3,12 @@ extend type Query {
     reviewById(id:ID): Review
 }
 
+extend type Mutation {
+    createReview(input: ReviewInput!): Review
+    updateReview(id: ID!, rate: String!): Review
+    deleteReview(id: ID!): Review
+}
+
 type Review{
     id:ID
     post: Post
@@ -20,4 +26,10 @@ type PaginatedReview implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+}
+
+input ReviewInput {
+    postId: ID!
+    userId: ID!
+    rate: String!
 }

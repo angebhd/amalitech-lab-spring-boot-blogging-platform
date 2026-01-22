@@ -45,8 +45,9 @@ public class CommentService {
 
 
 
-  public List<Comment> getByPostId(Long postId){
-    return this.commentDAO.findBy(String.valueOf(postId), CommentColumn.POST_ID);
+  public List<CommentDTO.Out> getByPostId(Long postId){
+    return this.commentDAO.findBy(String.valueOf(postId), CommentColumn.POST_ID)
+            .stream().map(this::mapToDTO).toList();
   }
 
   public List<Comment> getByUserId(Long postId){

@@ -3,6 +3,12 @@ extend type Query {
     tagById(id:Int): Tag
 }
 
+extend type Mutation {
+    createTag(input: TagInput!): Tag
+    updateTag(id: ID!, input: TagInput!): Tag
+    deleteTag(id: ID!): String
+}
+
 type Tag{
     id:ID
     name: String
@@ -17,4 +23,8 @@ type TagPaginated implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+}
+
+input TagInput {
+    name: String!
 }

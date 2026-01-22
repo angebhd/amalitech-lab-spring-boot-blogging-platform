@@ -3,6 +3,12 @@ extend type Query {
     commentById(id:ID): Comment
 }
 
+extend type Mutation {
+    createComment(input: CommentInput!): Comment
+    updateComment(id: ID!, body: String!): Comment
+    deleteComment(id: ID!): String
+}
+
 type Comment{
     id:ID
     post: Post
@@ -21,4 +27,11 @@ type PaginatedComment implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+}
+
+input CommentInput {
+    postId: ID!
+    userId: ID!
+    body: String!
+    parentCommentId: ID
 }

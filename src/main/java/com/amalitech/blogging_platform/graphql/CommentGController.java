@@ -5,6 +5,7 @@ import com.amalitech.blogging_platform.service.CommentService;
 import com.amalitech.blogging_platform.service.PostService;
 import com.amalitech.blogging_platform.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,22 @@ public class CommentGController {
   @QueryMapping
   public CommentDTO.GraphQL commentById(@Argument Long id) {
     return CommentDTO.Converter.toGraphQL(this.commentService.get(id));
+  }
+
+  @MutationMapping
+  public CommentDTO.GraphQL createComment(@Argument CommentDTO.In input) {
+    return CommentDTO.Converter.toGraphQL(this.commentService.create(input));
+  }
+
+  @MutationMapping
+  public CommentDTO.GraphQL updateComment(@Argument Long id, @Argument String body) {
+    return CommentDTO.Converter.toGraphQL(this.commentService.update(id, body));
+  }
+
+  @MutationMapping
+  public String deleteComment(@Argument Long id) {
+    this.commentService.delete(id);
+    return "Comment Successfully deleted";
   }
 
   @SchemaMapping(typeName = "Comment", field = "user")

@@ -4,8 +4,12 @@ extend type Query {
     userByUsername(username: String): User
 }
 
+extend type Mutation {
+    createUser(input: UserInput!): User
+    updateUser(id: ID!, input: UserInput!): User
+    deleteUser(id: ID!): User
+}
 
-# User related types
 type User {
     id: ID
     username: String
@@ -26,4 +30,10 @@ type UserPaginated implements Paginated{
 
 }
 
-
+input UserInput {
+    firstName: String
+    lastName: String
+    username: String!
+    email: String!
+    password: String!
+}

@@ -81,7 +81,7 @@ public class PostDTO {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private boolean isDeleted;
-    private Set<String> tags;
+    private List<String> tags;
     private List<Review>  reviews;
     private List<CommentDTO.Out> comments;
   }
