@@ -122,3 +122,30 @@ The platform follows a layered architecture to ensure separation of concerns:
 
 Graph error handling
 DTOs: validation & Documentation
+
+======
+AOP
+
+## AOP Implementation (Logging & Monitoring)
+
+Cross-cutting concerns (logging, performance, exceptions) are centralized using Spring AOP.
+
+### Aspects
+- **PerformanceAspect** (`aspect/PerformanceAspect.java`): Measures execution time of service methods
+- **LoggingAspect** (`aspect/LoggingAspect.java`): Logs method entry, exit, args, return values, exceptions
+
+### Pointcuts
+Applied to: `execution(public * com.amalitech.blogging_platform.service..*.*(..))`  
+→ Covers all public CRUD and analytics methods in service layer
+
+### Advice Types Used
+- @Before     → log entry + arguments
+- @AfterReturning → log successful exit + return value
+- @AfterThrowing → log exceptions with stack trace
+- @Around     → performance timing + combined logging
+
+### Configuration
+- Logging level: `logging.level.com.amalitech.blogging_platform.aspect=INFO` (application.properties)
+- No changes needed in service classes — fully declarative
+
+Benefits: Clean service code, centralized changes, easy to enable/disable.

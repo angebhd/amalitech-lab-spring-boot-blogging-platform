@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.graphql;
 
 import com.amalitech.blogging_platform.dto.*;
+import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +75,11 @@ public class PostGController {
 
   @SchemaMapping(typeName = "Post", field = "author")
   public UserDTO.Out author(PostDTO.GraphQL post) {
+    try{
     return this.userService.get(post.getAuthorId());
+    }catch (RessourceNotFoundException e){
+      return null;
+    }
   }
 
   @SchemaMapping(typeName = "Post", field = "reviews")

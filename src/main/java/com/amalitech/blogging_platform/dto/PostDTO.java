@@ -1,6 +1,5 @@
 package com.amalitech.blogging_platform.dto;
 
-import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Review;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -57,6 +56,7 @@ public class PostDTO {
   @Schema(name = "PostDTODetailed", description = "DTO returned by the server while fetching post detailed information")
   public static class Detailed {
     private Long id;
+    private Long authorId;
     private String authorName;
     private String title;
     private String body;
@@ -93,6 +93,7 @@ public class PostDTO {
       PostDTO.GraphQL graphQL = new PostDTO.GraphQL();
       graphQL.setId(detailed.getId());
       graphQL.setTitle(detailed.getTitle());
+      graphQL.setAuthorId(detailed.getAuthorId());
       graphQL.setBody(detailed.getBody());
       graphQL.setCreatedAt(detailed.getCreatedAt());
       graphQL.setUpdatedAt(detailed.getUpdatedAt());

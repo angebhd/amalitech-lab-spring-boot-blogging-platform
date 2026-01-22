@@ -393,6 +393,8 @@ public class PostDAO implements DAO<Post, Long> {
         dto.setDeletedAt(null); // Assuming deletedAt not fetched
         dto.setDeleted(post.isDeleted());
         dto.setAuthorName(rs.getString("author_name"));
+        dto.setAuthorId(rs.getLong("author_id"));
+        this.log.debug("author_id: {}", rs.getString("author_id"));
 
         // Load supporting data
         List<Tag> tagsList = getTagsForPost(postId);
