@@ -116,6 +116,25 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 
 ---
 
+---
+
+## Configuration & Profiles
+
+The application uses **Spring Profiles** to manage environment-specific configurations, particularly for API documentation tools.
+
+### Profiles
+- **`dev`** (Default): Designed for local development.
+  - **Enabled**: Swagger UI (`/swagger-ui.html`) and GraphiQL (`/graphiql`).
+- **`prod`**: Designed for production deployment.
+  - **Disabled**: Swagger UI and GraphiQL are disabled to prevent exposing API structure publicly.
+
+To run with a specific profile:
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+---
+
 ## Setup & Installation
 
 ### 1. Prerequisites
