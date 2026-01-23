@@ -1,4 +1,4 @@
-package com.amalitech.blogging_platform.graphql;
+package com.amalitech.blogging_platform.controller.graphql;
 
 import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
