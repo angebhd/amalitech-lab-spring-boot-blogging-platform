@@ -9,4 +9,4 @@ springdoc:
   api-docs:
     enabled: true
   swagger-ui:
-    enable: true
+    enabled: true

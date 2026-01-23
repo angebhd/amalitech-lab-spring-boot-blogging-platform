@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.dto;
 
+import com.amalitech.blogging_platform.model.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,9 +32,13 @@ public class UserDTO {
     @Email
     private String email;
 
+    @Schema(description = "User's role", example = "USER", enumAsRef = true)
+    private UserRole role = UserRole.USER;
+
+
     @Schema(description = "User's password", example = "MyD!fficultP@ssw0rd")
     @NotBlank(message = "Password should not be empty")
-    @Size(min = 4, max = 12, message = "Password should be between 4 and 12 characters")
+    @Size(min = 4, max = 20, message = "Password should be between 4 and 20 characters")
     private String password;
   }
 

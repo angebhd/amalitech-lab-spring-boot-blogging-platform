@@ -4,9 +4,19 @@ spring:
   graphql:
     graphiql:
       enabled: false
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USER}
+    password: ${DB_PASS}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update        # create / update / validate / none
+    show-sql: true
 
 springdoc:
   api-docs:
     enabled: false
   swagger-ui:
-    enable: false
+    enabled: false

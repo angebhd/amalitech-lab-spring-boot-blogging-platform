@@ -11,6 +11,7 @@ import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
+import com.amalitech.blogging_platform.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,8 +24,10 @@ public class UserService {
   private final PostDAO postDAO;
   private final CommentDAO commentDAO;
   private final ReviewService reviewService;
+  private final UserRepository userRepository;
 
-  public UserService(PasswordHashService passwordHashService, UserDAO userDAO, PostDAO postDAO, CommentDAO commentDAO, ReviewService reviewService) {
+  public UserService(UserRepository userRepository, PasswordHashService passwordHashService, UserDAO userDAO, PostDAO postDAO, CommentDAO commentDAO, ReviewService reviewService) {
+    this.userRepository = userRepository;
     this.passwordHashService = passwordHashService;
     this.userDAO = userDAO;
     this.postDAO = postDAO;
@@ -34,7 +37,7 @@ public class UserService {
 
 
   public UserDTO.Out create(UserDTO.In user){
-    User createdUser = this.userDAO.create(this.mapToUser(user));
+    User createdUser = this.userRepository.save(this.mapToUser(user));
     return this.mapToUserDTO(createdUser);
   }
 
