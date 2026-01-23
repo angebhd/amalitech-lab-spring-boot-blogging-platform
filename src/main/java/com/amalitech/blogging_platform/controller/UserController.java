@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Rest Controller for managing Users
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")

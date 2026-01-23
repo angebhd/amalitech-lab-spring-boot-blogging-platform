@@ -5,24 +5,29 @@ import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * DTO representing pagination parameters for API requests.
+ */
 @Getter
 @Setter
+@Schema(description = "Pagination request parameters")
 public class PageRequest {
-  @Schema(description = "page", defaultValue = "1")
+
+  @Schema(description = "Page number (1-based)",example = "1", defaultValue = "1")
   @Positive(message = "Page should be a positive number, greater than 0")
-  private final int page ;
+  private final int page;
 
-  @Schema(description = "page size", defaultValue = "10")
+  @Schema(description = "Number of items per page", example = "10", defaultValue = "10")
   @Positive(message = "Page size should be a positive number, greater than 0")
-  private final int size ;
+  private final int size;
 
-  public PageRequest(){
+  public PageRequest() {
     this.page = 1;
     this.size = 10;
   }
 
   public PageRequest(Integer page, Integer size) {
-    if (page == null || page <= 0 ) {
+    if (page == null || page <= 0) {
       page = 1;
     }
     if (size == null || size <= 0) {

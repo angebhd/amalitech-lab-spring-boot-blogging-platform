@@ -1,7 +1,6 @@
 package com.amalitech.blogging_platform.dto;
 
-import com.amalitech.blogging_platform.model.EReview;
-import com.amalitech.blogging_platform.model.Review;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +10,9 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * DTOs related to comment operations.
+ */
 public class CommentDTO {
 
   private CommentDTO(){}

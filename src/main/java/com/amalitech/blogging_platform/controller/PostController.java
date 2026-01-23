@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Rest Controller for managing Posts
+ */
 @RestController
 @RequestMapping("/api/v1/post")
 @Tag(name = "Posts", description = "Manage posts (Add, retrieve, update and delete)")

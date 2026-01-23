@@ -13,7 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * Service layer for managing posts.
+ * <p>
+ * Provides CRUD operations, search, and query post by authorId.
+ * Converts between Post entities and PostDTOs.
+ */
 @Service
 public class PostService {
 

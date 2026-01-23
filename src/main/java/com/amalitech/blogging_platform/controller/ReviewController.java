@@ -16,6 +16,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Rest Controller for managing Reviews
+ */
 @RestController
 @RequestMapping("/api/v1/review")
 @Tag(name = "Reviews", description = "Manage Reviews (Add, retrieve, update and delete)")

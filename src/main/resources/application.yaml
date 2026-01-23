@@ -13,3 +13,4 @@ springdoc:
     enabled: false
   swagger-ui:
     enable: false
+

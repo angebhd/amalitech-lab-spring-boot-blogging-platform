@@ -16,13 +16,13 @@ public class ReviewDTO {
 
   @Getter
   @Setter
-  @Schema(name = "ReviewDTO")
+  @Schema(name = "ReviewDTO", description = "Request payload to create or update a review")
   public static class In{
     @PositiveOrZero
     @Schema(description = "The post id", example = "67")
     private Long postId;
     @PositiveOrZero
-    @Schema(description = "The user id", example = "67")
+    @Schema(description = "The user id", example = "12")
     private Long userId;
     @NotNull
     @Schema(description = "The review rate", example = "FOUR")

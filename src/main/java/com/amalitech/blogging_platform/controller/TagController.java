@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Rest Controller for managing Tags
+ */
 @RestController
 @RequestMapping("/api/v1/tag")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "Manage tags (Add, retrieve, update and delete)")

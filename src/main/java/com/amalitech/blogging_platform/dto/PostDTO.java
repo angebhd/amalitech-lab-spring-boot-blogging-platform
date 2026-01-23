@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.dto;
 
 import com.amalitech.blogging_platform.model.Review;
+import com.amalitech.blogging_platform.model.Tag;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -81,7 +82,7 @@ public class PostDTO {
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private boolean isDeleted;
-    private List<String> tags;
+    private List<Tag> tags;
     private List<Review>  reviews;
     private List<CommentDTO.Out> comments;
   }

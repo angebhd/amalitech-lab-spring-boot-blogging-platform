@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Rest Controller for managing comments
+ */
 @RestController
 @RequestMapping("/api/v1/comment")
 @Tag(name = "Comments", description = "Manage commenents (Add, retrieve, update and delete)")
@@ -43,7 +46,7 @@ public class CommentController {
   @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<CommentDTO.Out>> getPost(@PathVariable Long id){
+  public ResponseEntity<GenericResponse<CommentDTO.Out>> getComment(@PathVariable Long id){
     GenericResponse<CommentDTO.Out> response = new GenericResponse<>(HttpStatus.OK, this.commentService.get(id));
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
