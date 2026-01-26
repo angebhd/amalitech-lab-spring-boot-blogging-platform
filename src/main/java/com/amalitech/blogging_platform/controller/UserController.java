@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,9 +40,9 @@ public class UserController {
   @ApiResponse(responseCode= "200", description = "Users retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<UserDTO.Out>>> getUsers(Pageable page){
+  public ResponseEntity<GenericResponse<Page<UserDTO.Out>>> getUsers(@ParameterObject Pageable pageable){
 
-    var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(page));
+    var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(pageable));
     return ResponseEntity.ok(response);
   }
 

@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.service;
 
 import com.amalitech.blogging_platform.dto.ReviewDTO;
+import com.amalitech.blogging_platform.exceptions.BadRequestException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.EReview;
 import com.amalitech.blogging_platform.model.Review;
@@ -41,6 +42,9 @@ public class ReviewService {
   }
 
   public Review update(Long id, EReview eReview){
+    if (eReview == null)
+      throw new BadRequestException("Review cannot be null !");
+
     Review review = this.reviewRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Review not found"));
     review.setRate(eReview.name());
     return this.reviewRepository.save(review);

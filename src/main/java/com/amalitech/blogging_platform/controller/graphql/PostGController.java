@@ -13,7 +13,6 @@ import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Controller
@@ -22,18 +21,14 @@ public class PostGController {
   private final PostService postService;
   private final UserService userService;
   private final ReviewService reviewService;
-  private final TagService tagService;
-  private final PostTagsService postTagsService;
   private final CommentService commentService;
 
   @Autowired
-  public PostGController(PostService postService, UserService userService, ReviewService reviewService,
-                         TagService tagService, CommentService commentService, PostTagsService postTagsService) {
+  public PostGController(PostService postService, UserService userService,
+                         ReviewService reviewService, CommentService commentService) {
     this.postService = postService;
     this.userService = userService;
     this.reviewService = reviewService;
-    this.tagService = tagService;
-    this.postTagsService = postTagsService;
     this.commentService = commentService;
   }
 
@@ -56,7 +51,8 @@ public class PostGController {
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> postSearch(@Argument Integer page, @Argument Integer size, @Argument String keyword, @Argument Long tagId) {
-    return PostDTO.Converter.fromDetaildtoGraphQL(this.postService.search(new PageRequest(page, size), keyword, tagId, null));
+//    return PostDTO.Converter.fromDetaildtoGraphQL(this.postService.search());
+    return null;
   }
 
   @MutationMapping
@@ -96,17 +92,7 @@ public class PostGController {
 
   @SchemaMapping(typeName = "Post", field = "tags")
   public List<Tag> tags(PostDTO.GraphQL post) {
-   return this.postTagsService.getTagsIdByPostId(post.getId())
-           .stream()
-           .map(id -> {
-             try{
-               return this.tagService.get(id);
-             }catch (Exception ignored){
-               return null; // if tag not found return null
-             }
-           })
-           .filter(Objects::nonNull) // remove null elements
-           .toList();
+   return List.of();
   }
 
 

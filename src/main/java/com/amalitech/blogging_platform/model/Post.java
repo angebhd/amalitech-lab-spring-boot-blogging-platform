@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,9 +26,6 @@ public class Post extends  BaseEntity {
   @OneToMany(mappedBy = "post",  fetch = FetchType.LAZY)
   private List<Comment> comments;
 
-  @Transient
-  private Long authorId;
-
   @Column(nullable = false, length = 100)
   private String title;
 
@@ -41,6 +39,6 @@ public class Post extends  BaseEntity {
           , joinColumns = @JoinColumn(name = "post_id"),
           inverseJoinColumns = @JoinColumn(name = "tag_id")
   )
-  private List<Tag> tags;
+  private List<Tag> tags = new ArrayList<>();
 
 }

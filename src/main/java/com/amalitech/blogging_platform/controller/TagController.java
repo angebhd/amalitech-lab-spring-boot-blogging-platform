@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,8 +33,8 @@ public class TagController {
   @ApiResponse(responseCode= "200", description = "Tags retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<Tag>>> getTags(Pageable page){
-    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(page));
+  public ResponseEntity<GenericResponse<Page<Tag>>> getTags(@ParameterObject Pageable pageable){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(pageable));
     return ResponseEntity.ok(response);
   }
 

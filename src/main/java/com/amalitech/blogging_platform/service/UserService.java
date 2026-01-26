@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class UserService {
   private final PasswordHashService passwordHashService;
@@ -18,7 +17,6 @@ public class UserService {
   public UserService(UserRepository userRepository, PasswordHashService passwordHashService) {
     this.userRepository = userRepository;
     this.passwordHashService = passwordHashService;
-
   }
 
 
@@ -45,9 +43,22 @@ public class UserService {
 
 
   public UserDTO.Out update(Long id, UserDTO.In user){
+
     User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     user.setPassword(oldUser.getPassword());
-    return this.mapToUserDTO(this.userRepository.save(this.mapToUser(user)));
+
+    if (user.getEmail() != null)
+      oldUser.setEmail(user.getEmail());
+    if (user.getUsername() != null)
+      oldUser.setUsername(user.getUsername());
+    if (user.getFirstName() != null)
+      oldUser.setFirstName(user.getFirstName());
+    if (user.getLastName() != null)
+      oldUser.setLastName(user.getLastName());
+    if (user.getRole() != null )
+      oldUser.setRole(user.getRole());
+
+    return this.mapToUserDTO(this.userRepository.save(oldUser));
   }
 
 

@@ -31,6 +31,13 @@ public class CustomExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.CONFLICT);
   }
 
+  @ExceptionHandler(BadRequestException.class)
+  public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());

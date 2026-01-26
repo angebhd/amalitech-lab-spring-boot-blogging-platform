@@ -2,6 +2,7 @@ package com.amalitech.blogging_platform.dto;
 
 import com.amalitech.blogging_platform.model.Review;
 import com.amalitech.blogging_platform.model.Tag;
+import com.amalitech.blogging_platform.model.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -43,7 +44,7 @@ public class PostDTO {
   @Schema(name = "PostDTOut", description = "DTO returned by the server while fetching post information")
   public static class Out {
     private Long id;
-    private Long authorId;
+    private User author;
     private String title;
     private String body;
     private LocalDateTime createdAt;
@@ -108,7 +109,7 @@ public class PostDTO {
       graphQL.setId(out.getId());
       graphQL.setTitle(out.getTitle());
       graphQL.setBody(out.getBody());
-      graphQL.setAuthorId(out.getAuthorId());
+//      graphQL.setAuthorId(out.getAuthorId());
       graphQL.setCreatedAt(out.getCreatedAt());
       graphQL.setUpdatedAt(out.getUpdatedAt());
       graphQL.setDeletedAt(out.getDeletedAt());

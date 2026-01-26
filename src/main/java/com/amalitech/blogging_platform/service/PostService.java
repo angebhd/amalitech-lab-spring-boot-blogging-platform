@@ -1,20 +1,21 @@
 package com.amalitech.blogging_platform.service;
 
-import com.amalitech.blogging_platform.dao.PostDAO;
-import com.amalitech.blogging_platform.dto.PageRequest;
-import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.PostDTO;
+import com.amalitech.blogging_platform.exceptions.BadRequestException;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Tag;
+import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.repository.PostRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.amalitech.blogging_platform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Service layer for managing posts.
@@ -25,53 +26,64 @@ import org.springframework.stereotype.Service;
 @Service
 public class PostService {
 
-  private final PostDAO postDAO;
   private final PostRepository postRepository;
   private final TagService tagService;
-  private final PostTagsService postTagsService;
-  private final Logger log = LoggerFactory.getLogger(PostService.class);
+  private final UserRepository userRepository;
 
   @Autowired
-  public PostService(PostRepository postRepository, PostDAO postDAO, TagService tagService, PostTagsService postTagsService) {
+  public PostService(PostRepository postRepository, UserRepository userRepository, TagService tagService ) {
     this.postRepository = postRepository;
-    this.postDAO = postDAO;
+    this.userRepository = userRepository;
     this.tagService = tagService;
-    this.postTagsService = postTagsService;
+
 
   }
 
-  public PostDTO.Out create(PostDTO.In post){
+  public PostDTO.Out create(PostDTO.In postIn){
+    Post post = this.mapToEntity(postIn);
 
-    Post newPost =  this.postRepository.save(this.mapToEntity(post));
+    if(postIn.getTags().size() > 5)
+      throw new BadRequestException("Post cannot have more than 5 tags");
 
-    post.getTags().forEach(name -> {
-      log.debug("Tag name: {}", name);
-      // TODO: check logic
+    List<Tag> tags = this.tagService.getOrCreateTags(postIn.getTags().stream().toList());
+    User author = userRepository.findById(postIn.getAuthorId())
+            .orElseThrow(()-> new DataConflictException("Author with id: " +postIn.getAuthorId() + " not found"));
 
-      try{
-      Tag t = this.tagService.create(name);
-        this.postTagsService.create(newPost.getId(), t.getId());
+    post.setTags(tags);
+    post.setAuthor(author);
+    Post savedPost =  this.postRepository.save(post);
 
-      }catch(DataConflictException e){ // if Data conflict is thrown, ignore it and save the post tags
-        Tag t = this.tagService.get(name);
-        this.postTagsService.create(newPost.getId(), t.getId());
-      }
-    });
-    return  this.mapToDTO(newPost);
+    return  this.mapToDTO(savedPost);
   }
 
   public PostDTO.Out update(Long id, PostDTO.In post){
+    if (post.getTags().size() > 5)
+      throw new BadRequestException("Post cannot have more than 5 tags");
 
-    return this.mapToDTO(this.postDAO.update(id, this.mapToEntity(post)));
+    Post oldPost = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Post not found"));
+    if(post.getTitle() != null)
+      oldPost.setTitle(post.getTitle());
+    if (oldPost.getBody() != null)
+      oldPost.setBody(post.getBody());
+
+    if (!oldPost.getTags().isEmpty()){
+      List<Tag> tags = this.tagService.getOrCreateTags(post.getTags().stream().toList());
+      oldPost.setTags(tags);
+    }
+
+    return this.mapToDTO(this.postRepository.save(oldPost));
   }
 
   public void delete(Long id){
     this.postRepository.deleteById(id);
   }
 
-  // TODO: change to use data jpa
-  public PaginatedData<PostDTO.Detailed> search(PageRequest pageRequest, String search, Long tagId, Long authorId){
-    return this.postDAO.getPostDTOs(pageRequest.getPage(), pageRequest.getSize(), search, tagId, authorId, false );
+  // TODO: correct this
+  public Page<PostDTO.Out> search(String keyword, Pageable pageable){
+    Post post = new Post();
+    post.setTitle(keyword);
+    post.setTitle(keyword);
+    return this.postRepository.findAll(Example.of(post), pageable).map(this::mapToDTO);
   }
 
   public Page<PostDTO.Out> get (Pageable pageable){
@@ -83,14 +95,6 @@ public class PostService {
     return this.postRepository.findById(id).map(this::mapToDTO).orElseThrow( () -> new RessourceNotFoundException("Post not found"));
   }
 
-  // TODO change to use data jpa
-  public PostDTO.Detailed getDetailed(Long id){
-    PostDTO.Detailed post = this.postDAO.getPostDTO(id, false);
-    if(post == null){
-      throw new RessourceNotFoundException("Post not found");
-    }
-    return post;
-  }
 
 
   public Page<PostDTO.Out> getByAuthorId(Long id, Pageable pageable){
@@ -102,7 +106,8 @@ public class PostService {
     PostDTO.Out dto = new PostDTO.Out();
     dto.setId(post.getId());
     dto.setTitle(post.getTitle());
-    dto.setAuthorId(post.getAuthorId());
+//    dto.setAuthorId(post.getAuthorId());
+    dto.setAuthor(post.getAuthor());
     dto.setBody(post.getBody());
     dto.setCreatedAt(post.getCreatedAt());
     dto.setUpdatedAt(post.getUpdatedAt());
@@ -114,10 +119,9 @@ public class PostService {
 
   private Post mapToEntity(PostDTO.In in){
     Post post = new Post();
-    post.setAuthorId(in.getAuthorId());
+//    post.setAuthorId(in.getAuthorId());
     post.setTitle(in.getTitle());
     post.setBody(in.getBody());
-
     return post;
   }
 

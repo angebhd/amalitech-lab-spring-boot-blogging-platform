@@ -4,6 +4,7 @@ import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.repository.TagRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,22 +12,52 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TagService {
 
   private final TagRepository tagRepository;
-  private final PostTagsService postTagsService;
 
   @Autowired
-  public TagService(TagRepository tagRepository, PostTagsService postTagsService) {
+  public TagService(TagRepository tagRepository) {
     this.tagRepository = tagRepository;
-    this.postTagsService = postTagsService;
   }
   public Page<Tag> get(Pageable page){
     return this.tagRepository.findAll(page);
   }
 
+  @Transactional
+  public List<Tag> getOrCreateTags(List<String> tagNames) {
+
+    if (tagNames == null || tagNames.isEmpty())
+      return List.of();
+
+    // Return the list of tags already in the DB
+    List<Tag> existingTags = tagRepository.findAllByNameInIgnoreCase(tagNames);
+
+    // Put the existing tag in the map for verification tin the next block
+    Map<String, Tag> existingMap = existingTags
+            .stream()
+            .collect(Collectors.toMap(t -> t.getName().toLowerCase(), t -> t));
+
+    List<Tag> result = new ArrayList<>();
+
+    //Looping through the TagNames to see if they were found, if they were not, create them
+    for (String name : tagNames) {
+      String key = name.toLowerCase();
+      if (existingMap.containsKey(key)) {
+        result.add(existingMap.get(key));
+      } else {
+        Tag newTag = new Tag();
+        newTag.setName(name);
+        tagRepository.save(newTag);
+        result.add(newTag);
+      }
+    }
+    return result;
+  }
 
   public Tag get(Long id){
     return this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
@@ -61,20 +92,6 @@ public class TagService {
 
   public void delete(Long id){
     this.tagRepository.deleteById(id);
-  }
-
-  public void updatePostTags(Long postId, List<String> tags){
-    this.postTagsService.deletePostTags(postId);
-    tags.forEach(tagName -> {
-      Tag tag = this.create(tagName);
-      this.postTagsService.create(postId, tag.getId());
-    });
-  }
-
-  public List<Tag> getTop(int limit){
-    List<Tag> tags = new ArrayList<>(limit);
-    this.postTagsService.getTopTagsId(limit).forEach(e -> tags.add(this.get(e)));
-    return tags;
   }
 
 }
