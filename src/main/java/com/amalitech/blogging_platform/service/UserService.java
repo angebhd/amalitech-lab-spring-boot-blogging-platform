@@ -1,38 +1,24 @@
 package com.amalitech.blogging_platform.service;
 
-
-import com.amalitech.blogging_platform.dao.CommentDAO;
-import com.amalitech.blogging_platform.dao.PostDAO;
-import com.amalitech.blogging_platform.dao.UserDAO;
-import com.amalitech.blogging_platform.dao.enums.CommentColumn;
-import com.amalitech.blogging_platform.dao.enums.UserColumn;
-import com.amalitech.blogging_platform.dto.PageRequest;
-import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class UserService {
   private final PasswordHashService passwordHashService;
-  private final UserDAO userDAO;
-  private final PostDAO postDAO;
-  private final CommentDAO commentDAO;
-  private final ReviewService reviewService;
   private final UserRepository userRepository;
+  private static final String USERNOTFOUNDMESSAGE = "User not found";
 
-  public UserService(UserRepository userRepository, PasswordHashService passwordHashService, UserDAO userDAO, PostDAO postDAO, CommentDAO commentDAO, ReviewService reviewService) {
+  public UserService(UserRepository userRepository, PasswordHashService passwordHashService) {
     this.userRepository = userRepository;
     this.passwordHashService = passwordHashService;
-    this.userDAO = userDAO;
-    this.postDAO = postDAO;
-    this.commentDAO = commentDAO;
-    this.reviewService = reviewService;
+
   }
 
 
@@ -42,62 +28,33 @@ public class UserService {
   }
 
   public UserDTO.Out get(Long id){
-    User response = this.userDAO.get(id);
-    if(response == null)
-      throw new RessourceNotFoundException("User not found");
+    User response = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     return this.mapToUserDTO(response);
   }
 
   public UserDTO.Out getByUsername(String username){
-    var response = this.userDAO.getBy(username, UserColumn.USERNAME, false);
+    var response = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    return this.mapToUserDTO(response);
+  }
 
-    if(response == null)
-      throw new RessourceNotFoundException("User not found");
-    return this.mapToUserDTO(response);  }
+  public Page<UserDTO.Out> get(Pageable pageable){
+    Page<User> response = this.userRepository.findAll(pageable);
+    return response.map(this::mapToUserDTO);
 
-  public PaginatedData<UserDTO.Out> get(PageRequest pageRequest){
-    PaginatedData<User> response = this.userDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
-    PaginatedData<UserDTO.Out> paginatedData = new PaginatedData<>();
-    paginatedData.setItems(response.getItems().stream().map(this::mapToUserDTO).toList());
-    paginatedData.setPage(response.getPage());
-    paginatedData.setPageSize(response.getPageSize());
-    paginatedData.setTotal(response.getTotal());
-    paginatedData.setTotalPages(response.getTotalPages());
-    return paginatedData;
   }
 
 
   public UserDTO.Out update(Long id, UserDTO.In user){
-    User oldUser = this.userDAO.get(id);
+    User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     user.setPassword(oldUser.getPassword());
-    return this.mapToUserDTO(this.userDAO.update(id, this.mapToUser(user)));
+    return this.mapToUserDTO(this.userRepository.save(this.mapToUser(user)));
   }
 
 
-  public boolean delete (Long id){
-    return this.userDAO.delete(id);
+  public void delete (Long id){
+    this.userRepository.deleteById(id);
   }
 
-  public Map<String, Integer> getUserStats(Long userId){
-    Map<String, Integer> response = new HashMap<>();
-    int postsCount = postDAO.getByAuthorId(userId, 1, Integer.MAX_VALUE).getItems().size();
-    response.put("postCount", postsCount);
-
-    int commentsCount = this.commentDAO.findBy(String.valueOf(userId), CommentColumn.USER_ID, false).size();
-    response.put("commentsCount", commentsCount);
-
-    int reviewsCount = this.reviewService.getByUserId(userId).size();
-    response.put("reviewsCount", reviewsCount);
-
-    return response;
-  }
-
-  public Map<String, Integer> getUserStats(Long userId, boolean withPerformance){
-    if (!withPerformance)
-      return this.getUserStats(userId);
-
-    return this.userDAO.getUserStats(userId);
-  }
 
   private User mapToUser(UserDTO.In in){
     User user = new User();
@@ -110,7 +67,7 @@ public class UserService {
     return user;
   }
 
-  private UserDTO.Out mapToUserDTO(User user){
+    private UserDTO.Out mapToUserDTO(User user){
     UserDTO.Out out = new UserDTO.Out();
     out.setId(user.getId());
     out.setFirstName(user.getFirstName());

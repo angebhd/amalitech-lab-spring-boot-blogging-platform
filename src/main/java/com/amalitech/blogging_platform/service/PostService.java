@@ -8,9 +8,12 @@ import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Tag;
+import com.amalitech.blogging_platform.repository.PostRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,12 +26,14 @@ import org.springframework.stereotype.Service;
 public class PostService {
 
   private final PostDAO postDAO;
+  private final PostRepository postRepository;
   private final TagService tagService;
   private final PostTagsService postTagsService;
   private final Logger log = LoggerFactory.getLogger(PostService.class);
 
   @Autowired
-  public PostService(PostDAO postDAO, TagService tagService, PostTagsService postTagsService) {
+  public PostService(PostRepository postRepository, PostDAO postDAO, TagService tagService, PostTagsService postTagsService) {
+    this.postRepository = postRepository;
     this.postDAO = postDAO;
     this.tagService = tagService;
     this.postTagsService = postTagsService;
@@ -37,10 +42,11 @@ public class PostService {
 
   public PostDTO.Out create(PostDTO.In post){
 
-    Post newPost =  this.postDAO.create(this.mapToEntity(post));
+    Post newPost =  this.postRepository.save(this.mapToEntity(post));
 
     post.getTags().forEach(name -> {
       log.debug("Tag name: {}", name);
+      // TODO: check logic
 
       try{
       Tag t = this.tagService.create(name);
@@ -55,31 +61,29 @@ public class PostService {
   }
 
   public PostDTO.Out update(Long id, PostDTO.In post){
+
     return this.mapToDTO(this.postDAO.update(id, this.mapToEntity(post)));
   }
 
   public void delete(Long id){
-    this.postDAO.delete(id);
+    this.postRepository.deleteById(id);
   }
 
+  // TODO: change to use data jpa
   public PaginatedData<PostDTO.Detailed> search(PageRequest pageRequest, String search, Long tagId, Long authorId){
     return this.postDAO.getPostDTOs(pageRequest.getPage(), pageRequest.getSize(), search, tagId, authorId, false );
   }
 
-  public PaginatedData<PostDTO.Out> get (PageRequest pageRequest){
-    PaginatedData<Post> res = this.postDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
+  public Page<PostDTO.Out> get (Pageable pageable){
+    return this.postRepository.findAll(pageable).map(this::mapToDTO);
 
-    return this.mapToDTO(res);
   }
 
   public PostDTO.Out get(Long id){
-    var post = this.postDAO.get(id);
-    if(post == null){
-      throw new RessourceNotFoundException("Post not found");
-    }
-    return this.mapToDTO(post);
+    return this.postRepository.findById(id).map(this::mapToDTO).orElseThrow( () -> new RessourceNotFoundException("Post not found"));
   }
 
+  // TODO change to use data jpa
   public PostDTO.Detailed getDetailed(Long id){
     PostDTO.Detailed post = this.postDAO.getPostDTO(id, false);
     if(post == null){
@@ -88,12 +92,9 @@ public class PostService {
     return post;
   }
 
-  public PaginatedData<PostDTO.Out> getByAuthorId(Long id){
-    return this.getByAuthorId(id, new PageRequest(1,10) );
-  }
 
-  public PaginatedData<PostDTO.Out> getByAuthorId(Long id, PageRequest pageRequest){
-      return this.mapToDTO(this.postDAO.getByAuthorId(id, pageRequest.getPage(), pageRequest.getSize()));
+  public Page<PostDTO.Out> getByAuthorId(Long id, Pageable pageable){
+      return postRepository.findByAuthor_Id(id, pageable).map(this::mapToDTO);
 
   }
 
@@ -120,14 +121,4 @@ public class PostService {
     return post;
   }
 
-  private PaginatedData<PostDTO.Out> mapToDTO(PaginatedData<Post> posts){
-    PaginatedData<PostDTO.Out> dto = new PaginatedData<>();
-    dto.setPage(posts.getPage());
-    dto.setPageSize(posts.getPageSize());
-    dto.setTotal(posts.getTotal());
-    dto.setTotalPages(posts.getTotalPages());
-    dto.setItems(posts.getItems().stream().map(this::mapToDTO).toList());
-
-    return dto;
-  }
 }

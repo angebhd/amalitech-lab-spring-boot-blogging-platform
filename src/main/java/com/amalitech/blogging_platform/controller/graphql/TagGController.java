@@ -1,6 +1,5 @@
 package com.amalitech.blogging_platform.controller.graphql;
 
-import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.TagService;
@@ -21,7 +20,9 @@ public class TagGController {
 
   @QueryMapping
   public PaginatedData<Tag> tags(@Argument Integer page, @Argument Integer size){
-    return this.tagService.get(new PageRequest(page, size));
+//    return this.tagService.get(Pageable.unpaged());
+
+    return null;
   }
   @QueryMapping
   public Tag tagById(@Argument Long id){

@@ -39,8 +39,8 @@ public class PostGController {
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> posts(@Argument Integer page, @Argument Integer size) {
-    log.debug("Getting paginated data");
-    return PostDTO.Converter.toGraphQL(this.postService.get(new PageRequest(page, size)));
+//    return PostDTO.Converter.toGraphQL(this.postService.get(new PageRequest(page, size)));
+    return null;
   }
   @QueryMapping
   public PostDTO.GraphQL postById(@Argument Long id) {
@@ -49,7 +49,9 @@ public class PostGController {
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> postByAuthorId(@Argument Integer page, @Argument Integer size, @Argument Long id) {
-    return PostDTO.Converter.toGraphQL(this.postService.getByAuthorId(id, new PageRequest(page, size)));
+
+//    return PostDTO.Converter.toGraphQL(this.postService.getByAuthorId(id, new PageRequest(page, size)));
+    return null;
   }
 
   @QueryMapping

@@ -23,7 +23,8 @@ public class ReviewGController {
   }
   @QueryMapping
   public PaginatedData<ReviewDTO.GraphQL> reviews(@Argument Integer page, @Argument Integer size) {
-    return ReviewDTO.Converter.toGraphQL(this.reviewService.get(new PageRequest(page, size)));
+//    return ReviewDTO.Converter.toGraphQL(this.reviewService.get(new PageRequest(page, size)));
+  return null;
   }
 
   @QueryMapping

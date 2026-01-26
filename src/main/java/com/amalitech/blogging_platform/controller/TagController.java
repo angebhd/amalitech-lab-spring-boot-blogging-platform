@@ -1,8 +1,6 @@
 package com.amalitech.blogging_platform.controller;
 
 import com.amalitech.blogging_platform.dto.GenericResponse;
-import com.amalitech.blogging_platform.dto.PageRequest;
-import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +32,8 @@ public class TagController {
   @ApiResponse(responseCode= "200", description = "Tags retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<PaginatedData<Tag>>> getTags(@ModelAttribute PageRequest pageRequest){
-    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(pageRequest));
+  public ResponseEntity<GenericResponse<Page<Tag>>> getTags(Pageable page){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(page));
     return ResponseEntity.ok(response);
   }
 

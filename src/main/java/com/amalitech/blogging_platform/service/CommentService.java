@@ -3,16 +3,15 @@ package com.amalitech.blogging_platform.service;
 
 
 import com.amalitech.blogging_platform.dao.CommentDAO;
-import com.amalitech.blogging_platform.dao.enums.CommentColumn;
 import com.amalitech.blogging_platform.dto.CommentDTO;
-import com.amalitech.blogging_platform.dto.PageRequest;
-import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Comment;
+import com.amalitech.blogging_platform.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 /**
  * Service layer for managing comments.
@@ -23,28 +22,22 @@ import java.util.List;
 @Service
 public class CommentService {
   private final CommentDAO commentDAO;
+  private final CommentRepository commentRepository;
 
   @Autowired
-  public CommentService(CommentDAO commentDAO){
+  public CommentService(CommentRepository commentRepository, CommentDAO commentDAO){
+    this.commentRepository = commentRepository;
     this.commentDAO = commentDAO;
   }
 
   /**
    * Retrieves paginated comments.
    *
-   * @param pageRequest object containing page number and size
+   * @param pageable object containing page number size, and sort method
    * @return paginated list of CommentDTO.Out
    */
-  public PaginatedData<CommentDTO.Out> get(PageRequest pageRequest){
-    var res = this.commentDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
-    PaginatedData<CommentDTO.Out> dto = new PaginatedData<>();
-    dto.setPage(res.getPage());
-    dto.setPageSize(res.getPageSize());
-    dto.setTotal(res.getTotal());
-    dto.setTotalPages(res.getTotalPages());
-    dto.setItems(res.getItems().stream().map(this::mapToDTO).toList());
-
-    return dto;
+  public Page<CommentDTO.Out> get(Pageable pageable){
+    return this.commentRepository.findAll(pageable).map(this::mapToDTO);
   }
 
   /**
@@ -55,12 +48,7 @@ public class CommentService {
    * @throws RessourceNotFoundException if the comment does not exist
    */
   public CommentDTO.Out get(Long id){
-    var res = this.commentDAO.get(id);
-
-    if (res == null)
-      throw  new RessourceNotFoundException("Comment not found");
-
-   return this.mapToDTO(res);
+    return this.commentRepository.findById(id).map(this::mapToDTO).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
   }
 
   /**
@@ -69,9 +57,8 @@ public class CommentService {
    * @param postId ID of the post
    * @return list of CommentDTO.Out for the post
    */
-  public List<CommentDTO.Out> getByPostId(Long postId){
-    return this.commentDAO.findBy(String.valueOf(postId), CommentColumn.POST_ID)
-            .stream().map(this::mapToDTO).toList();
+  public Page<CommentDTO.Out> getByPostId(Long postId){
+    return commentRepository.findByPost_Id(postId, Pageable.unpaged()).map(this::mapToDTO);
   }
 
   /**
@@ -80,8 +67,8 @@ public class CommentService {
    * @param userId ID of the user
    * @return list of Comment entities
    */
-  public List<Comment> getByUserId(Long userId){
-    return this.commentDAO.findBy(String.valueOf(userId), CommentColumn.USER_ID);
+  public Page<CommentDTO.Out> getByUserId(Long userId){
+    return commentRepository.findByUser_Id(userId, Pageable.unpaged()).map(this::mapToDTO);
   }
 
 
@@ -92,7 +79,7 @@ public class CommentService {
    * @return CommentDTO.Out representing the created comment
    */
   public CommentDTO.Out create(CommentDTO.In in){
-    return  this.mapToDTO(this.commentDAO.create(this.mapToEntity(in)));
+    return  this.mapToDTO(this.commentRepository.save(this.mapToEntity(in)));
   }
 
   /**
@@ -104,21 +91,18 @@ public class CommentService {
    * @throws RessourceNotFoundException if the comment does not exist
    */
   public CommentDTO.Out update (Long id, String body){
-    Comment exist = this.commentDAO.get(id);
-    if (exist == null)
-      throw  new RessourceNotFoundException("Comment not found");
-    exist.setBody(body);
-    return this.mapToDTO(this.commentDAO.update(id, exist));
+    Comment old = this.commentRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
+    old.setBody(body);
+    return this.mapToDTO(this.commentRepository.save(old));
   }
 
   /**
    * Deletes a comment by ID.
    *
    * @param id ID of the comment to delete
-   * @return true if deletion was successful
    */
-  public boolean delete (Long id){
-    return this.commentDAO.delete(id);
+  public void delete (Long id){
+    this.commentRepository.deleteById(id);
   }
 
   /**

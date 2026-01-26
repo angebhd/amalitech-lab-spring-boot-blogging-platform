@@ -37,7 +37,8 @@ public class CommentGController {
    */
   @QueryMapping
   public PaginatedData<CommentDTO.GraphQL> comments(@Argument Integer page, @Argument Integer size) {
-    return CommentDTO.Converter.toGraphQL(this.commentService.get(new PageRequest(page, size)));
+//    return CommentDTO.Converter.toGraphQL(this.commentService.get(new PageRequest(page, size)));
+    return null;
   }
 
   /**

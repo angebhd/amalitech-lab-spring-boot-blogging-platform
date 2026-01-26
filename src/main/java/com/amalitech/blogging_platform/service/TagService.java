@@ -1,12 +1,12 @@
 package com.amalitech.blogging_platform.service;
 
-import com.amalitech.blogging_platform.dao.TagDAO;
-import com.amalitech.blogging_platform.dto.PageRequest;
-import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
+import com.amalitech.blogging_platform.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,52 +14,53 @@ import java.util.List;
 
 @Service
 public class TagService {
-  private final TagDAO tagDAO;
+
+  private final TagRepository tagRepository;
   private final PostTagsService postTagsService;
 
   @Autowired
-  public TagService(TagDAO tagDAO, PostTagsService postTagsService) {
-    this.tagDAO = tagDAO;
+  public TagService(TagRepository tagRepository, PostTagsService postTagsService) {
+    this.tagRepository = tagRepository;
     this.postTagsService = postTagsService;
   }
-  public PaginatedData<Tag> get(PageRequest pageRequest){
-    return this.tagDAO.getAll(pageRequest.getPage(), pageRequest.getSize());
+  public Page<Tag> get(Pageable page){
+    return this.tagRepository.findAll(page);
   }
 
 
   public Tag get(Long id){
-    return this.tagDAO.get(id);
+    return this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
   }
 
   public Tag get(String name){
-    return this.tagDAO.get(name);
+    return tagRepository.findByNameIgnoreCase(name).orElseThrow(() -> new RessourceNotFoundException("No tag with name " + name));
   }
 
   public Tag create(String name){
-    Tag exist = this.tagDAO.get(name);
-    Tag t = new Tag();
-    t.setName(name);
-    if (exist != null){
+    boolean exist = tagRepository.existsByNameIgnoreCase(name);
+    if (exist){
       throw new DataConflictException("Tag name already exists");
     }
-   return this.tagDAO.create(t);
+    Tag t = new Tag();
+    t.setName(name);
+    return this.tagRepository.save(t);
   }
 
   public Tag update(Long id, String name){
-    Tag exist = this.tagDAO.get(id);
-    if (exist == null){
-      throw new RessourceNotFoundException("Tag id not found");
-    }
-    Tag existing = this.tagDAO.get(name);
-    if (existing != null){
+    Tag old = this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
+
+    boolean existing = this.tagRepository.existsByNameIgnoreCase(name);
+
+    if (existing){
       throw new DataConflictException("Tag name already exists");
     }
-    exist.setName(name);
-    return this.tagDAO.update(id, exist);
+    old.setName(name);
+
+    return this.tagRepository.save(old);
   }
 
   public void delete(Long id){
-    this.tagDAO.delete(id);
+    this.tagRepository.deleteById(id);
   }
 
   public void updatePostTags(Long postId, List<String> tags){

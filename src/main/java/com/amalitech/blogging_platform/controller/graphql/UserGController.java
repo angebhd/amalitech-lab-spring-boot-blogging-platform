@@ -1,10 +1,10 @@
 package com.amalitech.blogging_platform.controller.graphql;
 
-import com.amalitech.blogging_platform.dto.PageRequest;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -20,8 +20,9 @@ public class UserGController {
     this.userService = userService;
   }
   @QueryMapping
-  public PaginatedData<UserDTO.Out> users(@Argument Integer page, @Argument Integer size) {
-    return this.userService.get(new PageRequest(page, size));
+  public PaginatedData<UserDTO.Out> users(@Argument Pageable page) {
+//    return this.userService.get(page);
+    return null;
   }
   @QueryMapping
   public UserDTO.Out userById(@Argument Long id){

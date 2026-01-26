@@ -15,7 +15,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop        # create / update / validate / none
+      ddl-auto: update        # create / update / validate / none
     show-sql: true
 
 springdoc:
