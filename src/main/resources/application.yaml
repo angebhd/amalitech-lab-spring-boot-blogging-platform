@@ -2,6 +2,8 @@
 spring:
   application:
     name: Blogging platform
+  config:
+    import: file:.env[.properties]
   profiles:
     active: dev
   graphql:

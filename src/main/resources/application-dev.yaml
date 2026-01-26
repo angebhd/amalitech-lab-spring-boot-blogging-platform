@@ -3,7 +3,6 @@ spring:
     name: "Blogging platform"
   config:
     import: file:.env[.properties]
-
   graphql:
     graphiql:
       enabled: true
@@ -13,10 +12,15 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update        # create / update / validate / none
     show-sql: true
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 100
+        one-indexed-parameters: false
 
 springdoc:
   api-docs:
