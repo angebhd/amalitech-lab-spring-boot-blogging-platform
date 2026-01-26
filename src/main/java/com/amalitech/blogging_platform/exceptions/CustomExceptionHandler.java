@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,6 +23,7 @@ public class CustomExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
+
   @ExceptionHandler(DataConflictException.class)
   public ResponseEntity<ErrorResponse> handleConflictException(DataConflictException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
@@ -39,5 +41,11 @@ public class CustomExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
+ }
 }
