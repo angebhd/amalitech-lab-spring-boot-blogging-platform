@@ -1,6 +1,5 @@
 package com.amalitech.blogging_platform.service;
 
-import com.amalitech.blogging_platform.dao.ReviewDAO;
 import com.amalitech.blogging_platform.dto.ReviewDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.EReview;
@@ -14,12 +13,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReviewService {
 
-  private final ReviewDAO reviewDAO;
   private final ReviewRepository reviewRepository;
   @Autowired
-  public ReviewService(ReviewRepository repository ,ReviewDAO reviewDAO) {
+  public ReviewService(ReviewRepository repository) {
     this.reviewRepository = repository;
-    this.reviewDAO = reviewDAO;
   }
 
   public Page<Review> get(Pageable pageable) {
@@ -49,8 +46,8 @@ public class ReviewService {
     return this.reviewRepository.save(review);
   }
 
-  public boolean delete(Long id){
-    return this.reviewDAO.delete(id);
+  public void delete(Long id){
+    this.reviewRepository.deleteById(id);
   }
 
   private Review mapToReview(ReviewDTO.In dto){

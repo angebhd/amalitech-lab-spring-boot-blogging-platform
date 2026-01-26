@@ -1,8 +1,5 @@
 package com.amalitech.blogging_platform.service;
 
-
-
-import com.amalitech.blogging_platform.dao.CommentDAO;
 import com.amalitech.blogging_platform.dto.CommentDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Comment;
@@ -21,13 +18,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CommentService {
-  private final CommentDAO commentDAO;
   private final CommentRepository commentRepository;
 
   @Autowired
-  public CommentService(CommentRepository commentRepository, CommentDAO commentDAO){
+  public CommentService(CommentRepository commentRepository){
     this.commentRepository = commentRepository;
-    this.commentDAO = commentDAO;
   }
 
   /**
