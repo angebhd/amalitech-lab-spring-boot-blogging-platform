@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.dto;
 
+import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Review;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.model.User;
@@ -44,7 +45,7 @@ public class PostDTO {
   @Schema(name = "PostDTOut", description = "DTO returned by the server while fetching post information")
   public static class Out {
     private Long id;
-    private User author;
+    private UserDTO.Out author;
     private String title;
     private String body;
     private LocalDateTime createdAt;
@@ -91,6 +92,19 @@ public class PostDTO {
   public static class Converter{
     private Converter(){}
 
+    public static Out toDTO(Post post){
+      PostDTO.Out dto = new PostDTO.Out();
+      dto.setId(post.getId());
+      dto.setTitle(post.getTitle());
+      dto.setAuthor(UserDTO.Converter.toDTO(post.getAuthor()));
+      dto.setBody(post.getBody());
+      dto.setCreatedAt(post.getCreatedAt());
+      dto.setUpdatedAt(post.getUpdatedAt());
+      dto.setDeletedAt(post.getDeletedAt());
+      dto.setDeleted(post.isDeleted());
+      return dto;
+    }
+
     public static PostDTO.GraphQL  toGraphQL(PostDTO.Detailed detailed){
       PostDTO.GraphQL graphQL = new PostDTO.GraphQL();
       graphQL.setId(detailed.getId());
@@ -109,7 +123,6 @@ public class PostDTO {
       graphQL.setId(out.getId());
       graphQL.setTitle(out.getTitle());
       graphQL.setBody(out.getBody());
-//      graphQL.setAuthorId(out.getAuthorId());
       graphQL.setCreatedAt(out.getCreatedAt());
       graphQL.setUpdatedAt(out.getUpdatedAt());
       graphQL.setDeletedAt(out.getDeletedAt());

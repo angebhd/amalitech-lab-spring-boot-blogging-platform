@@ -1,6 +1,8 @@
 package com.amalitech.blogging_platform.service;
 
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.PostDTO;
+import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.BadRequestException;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
@@ -11,7 +13,6 @@ import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,6 @@ public class PostService {
     this.postRepository = postRepository;
     this.userRepository = userRepository;
     this.tagService = tagService;
-
 
   }
 
@@ -79,15 +79,15 @@ public class PostService {
   }
 
   // TODO: correct this
-  public Page<PostDTO.Out> search(String keyword, Pageable pageable){
+  public PaginatedData<PostDTO.Out> search(String keyword, Pageable pageable){
     Post post = new Post();
     post.setTitle(keyword);
     post.setTitle(keyword);
-    return this.postRepository.findAll(Example.of(post), pageable).map(this::mapToDTO);
+    return new PaginatedData<>(this.postRepository.findAll(Example.of(post), pageable).map(this::mapToDTO));
   }
 
-  public Page<PostDTO.Out> get (Pageable pageable){
-    return this.postRepository.findAll(pageable).map(this::mapToDTO);
+  public PaginatedData<PostDTO.Out> get (Pageable pageable){
+    return new PaginatedData<>(this.postRepository.findAll(pageable).map(this::mapToDTO));
 
   }
 
@@ -97,8 +97,8 @@ public class PostService {
 
 
 
-  public Page<PostDTO.Out> getByAuthorId(Long id, Pageable pageable){
-      return postRepository.findByAuthor_Id(id, pageable).map(this::mapToDTO);
+  public PaginatedData<PostDTO.Out> getByAuthorId(Long id, Pageable pageable){
+      return new PaginatedData<>(postRepository.findByAuthor_Id(id, pageable).map(this::mapToDTO));
 
   }
 
@@ -106,8 +106,7 @@ public class PostService {
     PostDTO.Out dto = new PostDTO.Out();
     dto.setId(post.getId());
     dto.setTitle(post.getTitle());
-//    dto.setAuthorId(post.getAuthorId());
-    dto.setAuthor(post.getAuthor());
+    dto.setAuthor(UserDTO.Converter.toDTO(post.getAuthor()));
     dto.setBody(post.getBody());
     dto.setCreatedAt(post.getCreatedAt());
     dto.setUpdatedAt(post.getUpdatedAt());
@@ -119,7 +118,6 @@ public class PostService {
 
   private Post mapToEntity(PostDTO.In in){
     Post post = new Post();
-//    post.setAuthorId(in.getAuthorId());
     post.setTitle(in.getTitle());
     post.setBody(in.getBody());
     return post;

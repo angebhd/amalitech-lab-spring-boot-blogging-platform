@@ -4,6 +4,7 @@ import com.amalitech.blogging_platform.dto.*;
 import com.amalitech.blogging_platform.service.CommentService;
 import com.amalitech.blogging_platform.service.PostService;
 import com.amalitech.blogging_platform.service.UserService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -37,8 +38,7 @@ public class CommentGController {
    */
   @QueryMapping
   public PaginatedData<CommentDTO.GraphQL> comments(@Argument Integer page, @Argument Integer size) {
-//    return CommentDTO.Converter.toGraphQL(this.commentService.get(new PageRequest(page, size)));
-    return null;
+    return CommentDTO.Converter.toGraphQL(this.commentService.get(Pageable.unpaged()));
   }
 
   /**

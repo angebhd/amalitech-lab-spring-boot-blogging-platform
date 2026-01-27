@@ -1,12 +1,13 @@
 package com.amalitech.blogging_platform.service;
 
+import com.amalitech.blogging_platform.dto.PaginatedData;
+import com.amalitech.blogging_platform.dto.TagDTO;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -24,12 +25,12 @@ public class TagService {
   public TagService(TagRepository tagRepository) {
     this.tagRepository = tagRepository;
   }
-  public Page<Tag> get(Pageable page){
-    return this.tagRepository.findAll(page);
+  public PaginatedData<TagDTO.Out> get(Pageable page){
+    return new PaginatedData<>(this.tagRepository.findAll(page).map(TagDTO.Converter::toDTO));
   }
 
   @Transactional
-  public List<Tag> getOrCreateTags(List<String> tagNames) {
+  List<Tag> getOrCreateTags(List<String> tagNames) {
 
     if (tagNames == null || tagNames.isEmpty())
       return List.of();
@@ -59,25 +60,25 @@ public class TagService {
     return result;
   }
 
-  public Tag get(Long id){
-    return this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
+  public TagDTO.Out get(Long id){
+    return this.tagRepository.findById(id).map(TagDTO.Converter::toDTO).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
   }
 
-  public Tag get(String name){
-    return tagRepository.findByNameIgnoreCase(name).orElseThrow(() -> new RessourceNotFoundException("No tag with name " + name));
+  public TagDTO.Out get(String name){
+    return tagRepository.findByNameIgnoreCase(name).map(TagDTO.Converter::toDTO).orElseThrow(() -> new RessourceNotFoundException("No tag with name " + name));
   }
 
-  public Tag create(String name){
+  public TagDTO.Out create(String name){
     boolean exist = tagRepository.existsByNameIgnoreCase(name);
     if (exist){
       throw new DataConflictException("Tag name already exists");
     }
     Tag t = new Tag();
     t.setName(name);
-    return this.tagRepository.save(t);
+    return TagDTO.Converter.toDTO(this.tagRepository.save(t));
   }
 
-  public Tag update(Long id, String name){
+  public TagDTO.Out update(Long id, String name){
     Tag old = this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
 
     boolean existing = this.tagRepository.existsByNameIgnoreCase(name);
@@ -87,7 +88,7 @@ public class TagService {
     }
     old.setName(name);
 
-    return this.tagRepository.save(old);
+    return TagDTO.Converter.toDTO(this.tagRepository.save(old));
   }
 
   public void delete(Long id){

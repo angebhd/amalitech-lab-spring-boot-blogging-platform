@@ -15,16 +15,9 @@ import java.util.List;
 @Setter
 public class Comment extends BaseEntity{
 
-
-  @Transient
-  private Long postId;
-
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
-
-  @Transient
-  private Long userId;
 
   @ManyToOne(fetch = FetchType.LAZY,  optional = false)
   @JoinColumn(name = "user_id", nullable = false)
@@ -32,9 +25,6 @@ public class Comment extends BaseEntity{
 
   @Lob
   private String body;
-
-  @Transient
-  private Long parentCommentId;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_comment_id")

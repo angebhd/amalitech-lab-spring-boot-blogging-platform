@@ -27,8 +27,22 @@ public class ReviewDTO {
     @NotNull
     @Schema(description = "The review rate", example = "FOUR")
     private EReview rate;
+  }
+
+  @Getter
+  @Setter
+  public static class Out{
+    private Long id;
+    private PostDTO.Out post;
+    private UserDTO.Out user;
+    private EReview rate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    private boolean isDeleted;
 
   }
+
   @Getter
   @Setter
   public static class GraphQL{
@@ -47,6 +61,19 @@ public class ReviewDTO {
 
   public static class Converter{
    private Converter(){}
+
+    public static Out toDTO(Review review){
+     Out out = new Out();
+     out.setId(review.getId());
+     out.setRate(EReview.valueOf(review.getRate()));
+     out.setPost(PostDTO.Converter.toDTO(review.getPost()));
+     out.setUser(UserDTO.Converter.toDTO(review.getUser()));
+     out.setCreatedAt(review.getCreatedAt());
+     out.setUpdatedAt(review.getUpdatedAt());
+     out.setDeletedAt(review.getDeletedAt());
+     out.setDeleted(review.isDeleted());
+     return out;
+    }
 
     public static GraphQL toGraphQL(Review review){
       GraphQL graphQL = new GraphQL();

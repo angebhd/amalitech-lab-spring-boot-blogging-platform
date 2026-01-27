@@ -1,5 +1,6 @@
 package com.amalitech.blogging_platform.dto;
 
+import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.model.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -56,4 +57,21 @@ public class UserDTO {
     private LocalDateTime deletedAt;
     private boolean isDeleted;
   }
+
+  public static class Converter{
+    public static Out toDTO(User user){
+      Out out = new Out();
+      out.setId(user.getId());
+      out.setFirstName(user.getFirstName());
+      out.setLastName(user.getLastName());
+      out.setUsername(user.getUsername());
+      out.setEmail(user.getEmail());
+      out.setCreatedAt(user.getCreatedAt());
+      out.setDeletedAt(user.getDeletedAt());
+      out.setUpdatedAt(user.getUpdatedAt());
+      out.setDeleted(user.isDeleted());
+      return out;
+    }
+  }
 }
+

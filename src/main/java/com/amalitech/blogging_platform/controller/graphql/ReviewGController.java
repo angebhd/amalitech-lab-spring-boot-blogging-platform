@@ -23,23 +23,23 @@ public class ReviewGController {
   }
   @QueryMapping
   public PaginatedData<ReviewDTO.GraphQL> reviews(@Argument Integer page, @Argument Integer size) {
-//    return ReviewDTO.Converter.toGraphQL(this.reviewService.get(new PageRequest(page, size)));
-  return null;
+//    return this.reviewService.get(Pageable.unpaged());
+    return null;
   }
 
   @QueryMapping
-  public ReviewDTO.GraphQL reviewById(@Argument Long id) {
-    return ReviewDTO.Converter.toGraphQL(this.reviewService.get(id));
+  public ReviewDTO.Out reviewById(@Argument Long id) {
+    return this.reviewService.get(id);
   }
 
   @MutationMapping
-  public ReviewDTO.GraphQL createReview(@Argument ReviewDTO.In input) {
-    return ReviewDTO.Converter.toGraphQL(this.reviewService.create(input));
+  public ReviewDTO.Out createReview(@Argument ReviewDTO.In input) {
+    return this.reviewService.create(input);
   }
 
   @MutationMapping
-  public ReviewDTO.GraphQL updateReview(@Argument Long id, @Argument String rate) {
-    return ReviewDTO.Converter.toGraphQL(this.reviewService.update(id, EReview.valueOf(rate)));
+  public ReviewDTO.Out updateReview(@Argument Long id, @Argument String rate) {
+    return this.reviewService.update(id, EReview.valueOf(rate));
   }
 
   @MutationMapping

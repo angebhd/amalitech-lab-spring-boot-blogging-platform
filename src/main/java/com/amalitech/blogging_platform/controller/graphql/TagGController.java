@@ -1,9 +1,11 @@
 package com.amalitech.blogging_platform.controller.graphql;
 
 import com.amalitech.blogging_platform.dto.PaginatedData;
+import com.amalitech.blogging_platform.dto.TagDTO;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -19,23 +21,22 @@ public class TagGController {
   }
 
   @QueryMapping
-  public PaginatedData<Tag> tags(@Argument Integer page, @Argument Integer size){
-//    return this.tagService.get(Pageable.unpaged());
+  public PaginatedData<TagDTO.Out> tags(@Argument Integer page, @Argument Integer size){
+    return this.tagService.get(Pageable.unpaged());
 
-    return null;
   }
   @QueryMapping
-  public Tag tagById(@Argument Long id){
+  public TagDTO.Out tagById(@Argument Long id){
     return this.tagService.get(id);
   }
 
   @MutationMapping
-  public Tag createTag(@Argument String input) {
+  public TagDTO.Out createTag(@Argument String input) {
     return this.tagService.create(input);
   }
 
   @MutationMapping
-  public Tag updateTag(@Argument Long id, @Argument String input) {
+  public TagDTO.Out updateTag(@Argument Long id, @Argument String input) {
     return this.tagService.update(id, input);
   }
 

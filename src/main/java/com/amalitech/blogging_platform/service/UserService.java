@@ -1,10 +1,10 @@
 package com.amalitech.blogging_platform.service;
 
+import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.repository.UserRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +35,8 @@ public class UserService {
     return this.mapToUserDTO(response);
   }
 
-  public Page<UserDTO.Out> get(Pageable pageable){
-    Page<User> response = this.userRepository.findAll(pageable);
-    return response.map(this::mapToUserDTO);
+  public PaginatedData<UserDTO.Out> get(Pageable pageable){
+   return new PaginatedData<>(this.userRepository.findAll(pageable).map(UserDTO.Converter::toDTO));
 
   }
 

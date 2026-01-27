@@ -21,8 +21,7 @@ public class UserGController {
   }
   @QueryMapping
   public PaginatedData<UserDTO.Out> users(@Argument Pageable page) {
-//    return this.userService.get(page);
-    return null;
+    return this.userService.get(page);
   }
   @QueryMapping
   public UserDTO.Out userById(@Argument Long id){

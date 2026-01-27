@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,7 +36,7 @@ public class CommentController {
   @ApiResponse(responseCode= "200", description = "Comments retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<CommentDTO.Out>>> getComments(@ParameterObject Pageable pageable){
+  public ResponseEntity<GenericResponse<PaginatedData<CommentDTO.Out>>> getComments(@ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.commentService.get(pageable));
     return ResponseEntity.ok(response);
   }

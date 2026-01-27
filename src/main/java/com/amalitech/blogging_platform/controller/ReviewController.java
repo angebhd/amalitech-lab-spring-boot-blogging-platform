@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -39,7 +38,7 @@ public class ReviewController {
   @ApiResponse(responseCode= "200", description = "Reviews retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<Review>>> getReview(@ParameterObject Pageable pageable){
+  public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReview(@ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.reviewService.get(pageable));
     return ResponseEntity.ok(response);
   }
@@ -50,7 +49,7 @@ public class ReviewController {
   @ApiResponse(responseCode= "404", description = "review not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid path variable", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Review>> getUser(@PathVariable Long id){
+  public ResponseEntity<GenericResponse<ReviewDTO.Out>> getUser(@PathVariable Long id){
     var response = new GenericResponse<>(HttpStatus.OK, this.reviewService.get(id));
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -60,8 +59,8 @@ public class ReviewController {
   @ApiResponse(responseCode= "201", description = "review created")
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Review>> create(@RequestBody @Valid ReviewDTO.In in){
-    Review review = this.reviewService.create(in);
+  public ResponseEntity<GenericResponse<ReviewDTO.Out>> create(@RequestBody @Valid ReviewDTO.In in){
+    ReviewDTO.Out review = this.reviewService.create(in);
     var response = new GenericResponse<>(HttpStatus.CREATED, review);
     return ResponseEntity.status(HttpStatusCode.valueOf(response.getStatusCode())).body(response);
   }
@@ -71,7 +70,7 @@ public class ReviewController {
   @ApiResponse(responseCode= "200", description = "review updated")
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Review>> update(@PathVariable Long id, @RequestBody EReview in){
+  public ResponseEntity<GenericResponse<ReviewDTO.Out>> update(@PathVariable Long id, @RequestBody EReview in){
     var resp = new GenericResponse<>(HttpStatus.OK, this.reviewService.update(id, in));
     return ResponseEntity.ok(resp);
   }

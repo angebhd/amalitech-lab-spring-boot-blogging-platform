@@ -37,7 +37,7 @@ public class CommentDTO {
   public  static  class Out{
     private Long id;
     private Long postId;
-    private Long userId;
+    private UserDTO.Out user;
     private String body;
     private Long parentCommentId;
     private LocalDateTime createdAt;
@@ -69,7 +69,7 @@ public class CommentDTO {
       GraphQL graphQL = new GraphQL();
       graphQL.setId(comment.getId());
       graphQL.setPostId(comment.getPostId());
-      graphQL.setUserId(comment.getUserId());
+      graphQL.setUserId(comment.getUser().getId());
       graphQL.setBody(comment.getBody());
       graphQL.setParentCommentId(comment.getParentCommentId());
       graphQL.setCreatedAt(comment.getCreatedAt());

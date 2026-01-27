@@ -16,7 +16,7 @@ import java.util.List;
 public class Post extends  BaseEntity {
 
 
-  @ManyToOne(fetch = FetchType.LAZY,  optional = false)
+  @ManyToOne(fetch = FetchType.EAGER,  optional = false)
   @JoinColumn(name = "author_id")
   private User author;
 

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,7 +36,7 @@ public class PostController {
   @ApiResponse(responseCode= "200", description = "Posts retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<PostDTO.Out>>> getPosts(@ParameterObject Pageable page){
+  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.Out>>> getPosts(@ParameterObject Pageable page){
     var response = new GenericResponse<>(HttpStatus.OK,  this.postService.get(page));
     return ResponseEntity.ok(response);
   }
@@ -59,7 +58,7 @@ public class PostController {
   @ApiResponse(responseCode= "200", description = "Posts retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<PostDTO.Out>>> getByAuthor(@PathVariable Long id, @ParameterObject Pageable pageable){
+  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.Out>>> getByAuthor(@PathVariable Long id, @ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.postService.getByAuthorId(id, pageable));
     return ResponseEntity.ok(response);
   }
@@ -70,8 +69,8 @@ public class PostController {
   @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<PostDTO.Out>>> search(@ParameterObject Pageable page, @RequestParam(required = false) String keyword ){
-    GenericResponse<Page<PostDTO.Out>> response = new GenericResponse<>(HttpStatus.OK, this.postService.search(keyword, page));
+  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.Out>>> search(@ParameterObject Pageable page, @RequestParam(required = false) String keyword ){
+    GenericResponse<PaginatedData<PostDTO.Out>> response = new GenericResponse<>(HttpStatus.OK, this.postService.search(keyword, page));
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }

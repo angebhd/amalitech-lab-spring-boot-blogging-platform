@@ -15,14 +15,14 @@ public class Review extends BaseEntity {
   @Transient
   private Long postId;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
   @Transient
   private Long userId;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.REMOVE)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 

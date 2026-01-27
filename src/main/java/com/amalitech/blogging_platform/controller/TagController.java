@@ -1,7 +1,8 @@
 package com.amalitech.blogging_platform.controller;
 
 import com.amalitech.blogging_platform.dto.GenericResponse;
-import com.amalitech.blogging_platform.model.Tag;
+import com.amalitech.blogging_platform.dto.PaginatedData;
+import com.amalitech.blogging_platform.dto.TagDTO;
 import com.amalitech.blogging_platform.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class TagController {
   @ApiResponse(responseCode= "200", description = "Tags retrieved")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Page<Tag>>> getTags(@ParameterObject Pageable pageable){
+  public ResponseEntity<GenericResponse<PaginatedData<TagDTO.Out>>> getTags(@ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(pageable));
     return ResponseEntity.ok(response);
   }
@@ -43,7 +43,7 @@ public class TagController {
   @ApiResponse(responseCode= "200", description = "Tag retrieved")
   @ApiResponse(responseCode= "404", description = "Tag not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Tag>> getTag(@PathVariable Long id){
+  public ResponseEntity<GenericResponse<TagDTO.Out>> getTag(@PathVariable Long id){
     var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(id));
     return ResponseEntity.ok(response);
   }
@@ -53,7 +53,7 @@ public class TagController {
   @ApiResponse(responseCode= "201", description = "Tags created")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Tag>> create(@RequestBody String tags){
+  public ResponseEntity<GenericResponse<TagDTO.Out>> create(@RequestBody String tags){
     var response = new GenericResponse<>(HttpStatus.CREATED,  this.tagService.create(tags));
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
@@ -63,7 +63,7 @@ public class TagController {
   @ApiResponse(responseCode= "200", description = "Tags updateg")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Tag>> update(@PathVariable Long id, @RequestBody String tag){
+  public ResponseEntity<GenericResponse<TagDTO.Out>> update(@PathVariable Long id, @RequestBody String tag){
     var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.update(id, tag ));
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }

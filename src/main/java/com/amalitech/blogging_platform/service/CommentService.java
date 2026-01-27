@@ -1,11 +1,16 @@
 package com.amalitech.blogging_platform.service;
 
 import com.amalitech.blogging_platform.dto.CommentDTO;
+import com.amalitech.blogging_platform.dto.PaginatedData;
+import com.amalitech.blogging_platform.dto.UserDTO;
+import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Comment;
 import com.amalitech.blogging_platform.repository.CommentRepository;
+import com.amalitech.blogging_platform.repository.PostRepository;
+import com.amalitech.blogging_platform.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +24,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommentService {
   private final CommentRepository commentRepository;
+  private final PostRepository postRepository;
+  private final UserRepository userRepository;
 
   @Autowired
-  public CommentService(CommentRepository commentRepository){
+  public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository){
     this.commentRepository = commentRepository;
+    this.postRepository = postRepository;
+    this.userRepository = userRepository;
   }
 
   /**
@@ -31,8 +40,8 @@ public class CommentService {
    * @param pageable object containing page number size, and sort method
    * @return paginated list of CommentDTO.Out
    */
-  public Page<CommentDTO.Out> get(Pageable pageable){
-    return this.commentRepository.findAll(pageable).map(this::mapToDTO);
+  public PaginatedData<CommentDTO.Out> get(Pageable pageable){
+    return new PaginatedData<>(this.commentRepository.findAll(pageable).map(this::mapToDTO));
   }
 
   /**
@@ -52,8 +61,8 @@ public class CommentService {
    * @param postId ID of the post
    * @return list of CommentDTO.Out for the post
    */
-  public Page<CommentDTO.Out> getByPostId(Long postId){
-    return commentRepository.findByPost_Id(postId, Pageable.unpaged()).map(this::mapToDTO);
+  public PaginatedData<CommentDTO.Out> getByPostId(Long postId){
+    return new PaginatedData<>(commentRepository.findByPost_Id(postId, Pageable.unpaged()).map(this::mapToDTO));
   }
 
   /**
@@ -62,8 +71,8 @@ public class CommentService {
    * @param userId ID of the user
    * @return list of Comment entities
    */
-  public Page<CommentDTO.Out> getByUserId(Long userId){
-    return commentRepository.findByUser_Id(userId, Pageable.unpaged()).map(this::mapToDTO);
+  public PaginatedData<CommentDTO.Out> getByUserId(Long userId){
+    return new PaginatedData<>(commentRepository.findByUser_Id(userId, Pageable.unpaged()).map(this::mapToDTO));
   }
 
 
@@ -73,8 +82,23 @@ public class CommentService {
    * @param in input DTO containing comment data
    * @return CommentDTO.Out representing the created comment
    */
+  @Transactional
   public CommentDTO.Out create(CommentDTO.In in){
-    return  this.mapToDTO(this.commentRepository.save(this.mapToEntity(in)));
+    Comment comment = new Comment();
+    comment.setBody(in.getBody());
+
+    var post = this.postRepository.findById(in.getPostId()).orElseThrow(() -> new DataConflictException("Post not found, with id " + in.getPostId()));
+    var user = this.userRepository.findById(in.getUserId()).orElseThrow(() -> new DataConflictException("User not found, with id " + in.getUserId()));
+    if (in.getParentCommentId() != null) {
+      var parent = this.commentRepository.findById(in.getParentCommentId()).orElseThrow(() -> new DataConflictException("Parent comment not found, with id " + in.getParentCommentId()));
+      if(!parent.getPost().getId().equals(post.getId())){
+        throw new DataConflictException("Comment and parent comment should have the same post ID");
+      }
+      comment.setParentComment(parent);
+    }
+    comment.setPost(post);
+    comment.setUser(user);
+    return  this.mapToDTO(this.commentRepository.save(comment));
   }
 
   /**
@@ -109,31 +133,16 @@ public class CommentService {
   private CommentDTO.Out mapToDTO(Comment entity){
     CommentDTO.Out dto = new CommentDTO.Out();
     dto.setId(entity.getId());
-    dto.setPostId(entity.getPostId());
-    dto.setUserId(entity.getUserId());
+    dto.setPostId(entity.getPost().getId());
+    dto.setUser(UserDTO.Converter.toDTO(entity.getUser())); // call the Converter, and move it to DTO Converter class
     dto.setBody(entity.getBody());
-    dto.setParentCommentId(entity.getParentCommentId());
+    if(entity.getParentComment() != null)
+     dto.setParentCommentId(entity.getParentComment().getId());
+
     dto.setCreatedAt(entity.getCreatedAt());
     dto.setUpdatedAt(entity.getUpdatedAt());
     dto.setDeletedAt(entity.getDeletedAt());
     dto.setDeleted(entity.isDeleted());
     return dto;
   }
-
-  /**
-   * Converts a CommentDTO.In to a Comment entity.
-   *
-   * @param in CommentDTO.In input
-   * @return Comment entity
-   */
-  private Comment mapToEntity(CommentDTO.In in){
-    Comment entity = new Comment();
-    entity.setPostId(in.getPostId());
-    entity.setUserId(in.getUserId());
-    entity.setBody(in.getBody());
-    entity.setParentCommentId(in.getParentCommentId());
-
-    return entity;
-  }
-
 }

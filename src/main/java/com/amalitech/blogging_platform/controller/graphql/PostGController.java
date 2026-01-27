@@ -6,6 +6,7 @@ import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -34,8 +35,7 @@ public class PostGController {
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> posts(@Argument Integer page, @Argument Integer size) {
-//    return PostDTO.Converter.toGraphQL(this.postService.get(new PageRequest(page, size)));
-    return null;
+    return PostDTO.Converter.toGraphQL(this.postService.get(Pageable.unpaged()));
   }
   @QueryMapping
   public PostDTO.GraphQL postById(@Argument Long id) {
@@ -44,15 +44,12 @@ public class PostGController {
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> postByAuthorId(@Argument Integer page, @Argument Integer size, @Argument Long id) {
-
-//    return PostDTO.Converter.toGraphQL(this.postService.getByAuthorId(id, new PageRequest(page, size)));
-    return null;
+    return PostDTO.Converter.toGraphQL(this.postService.getByAuthorId(id, Pageable.unpaged()));
   }
 
   @QueryMapping
   public PaginatedData<PostDTO.GraphQL> postSearch(@Argument Integer page, @Argument Integer size, @Argument String keyword, @Argument Long tagId) {
-//    return PostDTO.Converter.fromDetaildtoGraphQL(this.postService.search());
-    return null;
+    return PostDTO.Converter.toGraphQL(this.postService.search(keyword, Pageable.unpaged()));
   }
 
   @MutationMapping
@@ -81,14 +78,14 @@ public class PostGController {
   }
 
   @SchemaMapping(typeName = "Post", field = "reviews")
-  public List<ReviewDTO.GraphQL> review(PostDTO.GraphQL post) {
-    return this.reviewService.getByPostId(post.getId()).stream().map(ReviewDTO.Converter::toGraphQL).toList();
+  public PaginatedData<ReviewDTO.Out> review(PostDTO.GraphQL post) {
+    return this.reviewService.getByPostId(post.getId());
   }
 
-  @SchemaMapping(typeName = "Post", field = "comments")
-  public List<CommentDTO.GraphQL> comment(PostDTO.GraphQL post) {
-    return this.commentService.getByPostId(post.getId()).stream().map(CommentDTO.Converter::toGraphQL).toList();
-  }
+//  @SchemaMapping(typeName = "Post", field = "comments")
+//  public List<CommentDTO.GraphQL> comment(PostDTO.GraphQL post) {
+//    return this.commentService.getByPostId(post.getId()).stream().map(CommentDTO.Converter::toGraphQL).toList();
+//  }
 
   @SchemaMapping(typeName = "Post", field = "tags")
   public List<Tag> tags(PostDTO.GraphQL post) {
