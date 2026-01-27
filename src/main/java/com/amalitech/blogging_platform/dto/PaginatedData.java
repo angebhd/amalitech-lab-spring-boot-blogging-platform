@@ -23,16 +23,14 @@ import java.util.List;
 public class PaginatedData<T> {
 
   public PaginatedData(Page<T> page) {
-    PaginatedData<T> dto = new PaginatedData<>();
-    dto.setPage(page.getNumber());
-    dto.setPageSize(page.getSize());
-    dto.setTotalPages(page.getTotalPages());
-    dto.setTotal((int)page.getTotalElements()); // TODO change it to Long everiwhere
-    dto.setItems(page.getContent());
-    dto.setSort(page.getSort());
-    dto.setSort(page.getSort());
-    dto.setFirstPage(page.isFirst());
-    dto.setLastPage(page.isLast());
+    this.setPage(page.getNumber());
+    this.setPageSize(page.getSize());
+    this.setTotalPages(page.getTotalPages());
+    this.setTotal((int)page.getTotalElements());
+    this.setItems(page.getContent());
+    this.setSort(page.getSort());
+    this.setFirstPage(page.isFirst());
+    this.setLastPage(page.isLast());
   }
 
   @Schema(description = "List of items in the current page", example = "[item1, item2, item3, item4]")
