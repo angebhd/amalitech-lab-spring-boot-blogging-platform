@@ -41,7 +41,8 @@ public class CommentService {
    * @return paginated list of CommentDTO.Out
    */
   public PaginatedData<CommentDTO.Out> get(Pageable pageable){
-    return new PaginatedData<>(this.commentRepository.findAll(pageable).map(this::mapToDTO));
+    var data = this.commentRepository.findAll(pageable).map(this::mapToDTO);
+    return new PaginatedData<>(data);
   }
 
   /**

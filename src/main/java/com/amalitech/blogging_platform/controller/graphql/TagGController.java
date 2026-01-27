@@ -1,15 +1,16 @@
 package com.amalitech.blogging_platform.controller.graphql;
 
+import com.amalitech.blogging_platform.dto.GraphQLPageableBuilder;
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.TagDTO;
-import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 public class TagGController {
@@ -21,8 +22,8 @@ public class TagGController {
   }
 
   @QueryMapping
-  public PaginatedData<TagDTO.Out> tags(@Argument Integer page, @Argument Integer size){
-    return this.tagService.get(Pageable.unpaged());
+  public PaginatedData<TagDTO.Out> tags(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy){
+    return this.tagService.get(GraphQLPageableBuilder.get(page, size, sortBy));
 
   }
   @QueryMapping

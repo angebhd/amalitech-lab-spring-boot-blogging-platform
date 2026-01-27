@@ -2,14 +2,13 @@ package com.amalitech.blogging_platform.controller.graphql;
 
 import com.amalitech.blogging_platform.dto.*;
 import com.amalitech.blogging_platform.service.CommentService;
-import com.amalitech.blogging_platform.service.PostService;
-import com.amalitech.blogging_platform.service.UserService;
-import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 /**
  * GraphQL controller (resolver) for managing comments.
@@ -20,25 +19,24 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class CommentGController {
   private final CommentService commentService;
-  private final UserService userService;
-  private final PostService postService;
-  public CommentGController(CommentService commentService, UserService userService, PostService postService) {
+  public CommentGController(CommentService commentService) {
     this.commentService = commentService;
-    this.userService = userService;
-    this.postService = postService;
+
   }
 
 
   /**
    * Fetch paginated comments.
    *
-   * @param page page number (1-based)
-   * @param size number of comments per page
-   * @return paginated GraphQL representation of comments
+   * @param page requested page (0 index)
+   * @param size requested elements in the page
+   * @param sortBy sorting arguments
+   * @return paginated comments
    */
   @QueryMapping
-  public PaginatedData<CommentDTO.GraphQL> comments(@Argument Integer page, @Argument Integer size) {
-    return CommentDTO.Converter.toGraphQL(this.commentService.get(Pageable.unpaged()));
+  public PaginatedData<CommentDTO.Out> comments(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+
+    return this.commentService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
 
   /**
@@ -48,8 +46,8 @@ public class CommentGController {
    * @return GraphQL representation of the comment
    */
   @QueryMapping
-  public CommentDTO.GraphQL commentById(@Argument Long id) {
-    return CommentDTO.Converter.toGraphQL(this.commentService.get(id));
+  public CommentDTO.Out commentById(@Argument Long id) {
+    return this.commentService.get(id);
   }
 
   /**
@@ -59,8 +57,8 @@ public class CommentGController {
    * @return GraphQL representation of the created comment
    */
   @MutationMapping
-  public CommentDTO.GraphQL createComment(@Argument CommentDTO.In input) {
-    return CommentDTO.Converter.toGraphQL(this.commentService.create(input));
+  public CommentDTO.Out createComment(@Argument CommentDTO.In input) {
+    return this.commentService.create(input);
   }
 
   /**
@@ -71,8 +69,8 @@ public class CommentGController {
    * @return GraphQL representation of the updated comment
    */
   @MutationMapping
-  public CommentDTO.GraphQL updateComment(@Argument Long id, @Argument String body) {
-    return CommentDTO.Converter.toGraphQL(this.commentService.update(id, body));
+  public CommentDTO.Out updateComment(@Argument Long id, @Argument String body) {
+    return this.commentService.update(id, body);
   }
 
   /**
@@ -90,39 +88,13 @@ public class CommentGController {
   /**
    * Resolves the user of a comment for GraphQL queries.
    *
-   * @param graphQL GraphQL comment object
+   * @param comment Comment object
    * @return user who wrote the comment
    */
   @SchemaMapping(typeName = "Comment", field = "user")
-  public UserDTO.Out user(CommentDTO.GraphQL graphQL) {
-    return this.userService.get(graphQL.getUserId());
+  public UserDTO.Out user(CommentDTO.Out comment) {
+    return comment.getUser();
   }
 
-  /**
-   * Resolves the post of a comment for GraphQL queries.
-   *
-   * @param graphQL GraphQL comment object
-   * @return post associated with the comment
-   */
-  @SchemaMapping(typeName = "Comment", field = "post")
-  public PostDTO.GraphQL post(CommentDTO.GraphQL graphQL) {
-    return PostDTO.Converter.toGraphQL(this.postService.get(graphQL.getPostId()));
-  }
-
-
-  /**
-   * Resolves the parent comment of a comment, if it exists.
-   *
-   * @param graphQL GraphQL comment object
-   * @return parent comment, or null if none exists
-   */
-  @SchemaMapping(typeName = "Comment", field = "parent")
-  public CommentDTO.GraphQL comment(CommentDTO.GraphQL graphQL) {
-    try{
-      return CommentDTO.Converter.toGraphQL(this.commentService.get(graphQL.getParentCommentId()));
-    }catch(Exception ignored){ // if no parent, just return null (It is possible for a comment to not have a parent)
-      return null;
-    }
-  }
 
 }

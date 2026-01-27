@@ -2,29 +2,26 @@ package com.amalitech.blogging_platform.controller.graphql;
 
 import com.amalitech.blogging_platform.dto.*;
 import com.amalitech.blogging_platform.model.EReview;
-import com.amalitech.blogging_platform.service.PostService;
 import com.amalitech.blogging_platform.service.ReviewService;
-import com.amalitech.blogging_platform.service.UserService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 @Controller
 public class ReviewGController {
   private final ReviewService reviewService;
-  private final PostService postService;
-  private final UserService userService;
-  public ReviewGController(ReviewService reviewService, PostService postService, UserService userService) {
+
+  public ReviewGController(ReviewService reviewService) {
     this.reviewService = reviewService;
-    this.postService = postService;
-    this.userService = userService;
+
   }
   @QueryMapping
-  public PaginatedData<ReviewDTO.GraphQL> reviews(@Argument Integer page, @Argument Integer size) {
-//    return this.reviewService.get(Pageable.unpaged());
-    return null;
+  public PaginatedData<ReviewDTO.Out> reviews(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+    return this.reviewService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
 
   @QueryMapping
@@ -49,11 +46,11 @@ public class ReviewGController {
   }
 
   @SchemaMapping(typeName = "Review", field = "user")
-  public UserDTO.Out user(ReviewDTO.GraphQL graphQL) {
-      return this.userService.get(graphQL.getUserId());
+  public UserDTO.Out user(ReviewDTO.Out review) {
+      return review.getUser();
   }
   @SchemaMapping(typeName = "Review", field = "post")
-  public PostDTO.GraphQL post(ReviewDTO.GraphQL graphQL) {
-    return PostDTO.Converter.toGraphQL(this.postService.get(graphQL.getPostId()));
+  public PostDTO.Out post(ReviewDTO.Out review) {
+    return review.getPost();
   }
 }

@@ -11,6 +11,8 @@ import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import java.util.List;
 @Service
 public class PostService {
 
+  private static final Logger log = LoggerFactory.getLogger(PostService.class);
   private final PostRepository postRepository;
   private final TagService tagService;
   private final UserRepository userRepository;
@@ -87,7 +90,9 @@ public class PostService {
   }
 
   public PaginatedData<PostDTO.Out> get (Pageable pageable){
-    return new PaginatedData<>(this.postRepository.findAll(pageable).map(this::mapToDTO));
+    var data = this.postRepository.findAll(pageable).map(this::mapToDTO);
+    log.warn("Number of items: {}",data.get().toList().size());
+    return new PaginatedData<>(data);
 
   }
 

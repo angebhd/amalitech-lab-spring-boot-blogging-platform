@@ -46,6 +46,7 @@ public class PostDTO {
   public static class Out {
     private Long id;
     private UserDTO.Out author;
+    private List<TagDTO.Out> tags;
     private String title;
     private String body;
     private LocalDateTime createdAt;
@@ -54,40 +55,6 @@ public class PostDTO {
     private boolean isDeleted;
   }
 
-  @Getter
-  @Setter
-  @Schema(name = "PostDTODetailed", description = "DTO returned by the server while fetching post detailed information")
-  public static class Detailed {
-    private Long id;
-    private Long authorId;
-    private String authorName;
-    private String title;
-    private String body;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
-    private boolean isDeleted;
-    private Set<String> tags;
-    private List<Review>  reviews;
-    private List<CommentDTO.Out> comments;
-  }
-
-  @Getter
-  @Setter
-  public static class GraphQL{
-    private Long id;
-    private UserDTO.Out author;
-    private Long authorId;
-    private String title;
-    private String body;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
-    private boolean isDeleted;
-    private List<Tag> tags;
-    private List<Review>  reviews;
-    private List<CommentDTO.Out> comments;
-  }
 
   public static class Converter{
     private Converter(){}
@@ -97,6 +64,7 @@ public class PostDTO {
       dto.setId(post.getId());
       dto.setTitle(post.getTitle());
       dto.setAuthor(UserDTO.Converter.toDTO(post.getAuthor()));
+      dto.setTags(post.getTags().stream().map(TagDTO.Converter::toDTO).toList());
       dto.setBody(post.getBody());
       dto.setCreatedAt(post.getCreatedAt());
       dto.setUpdatedAt(post.getUpdatedAt());
@@ -104,56 +72,6 @@ public class PostDTO {
       dto.setDeleted(post.isDeleted());
       return dto;
     }
-
-    public static PostDTO.GraphQL  toGraphQL(PostDTO.Detailed detailed){
-      PostDTO.GraphQL graphQL = new PostDTO.GraphQL();
-      graphQL.setId(detailed.getId());
-      graphQL.setTitle(detailed.getTitle());
-      graphQL.setAuthorId(detailed.getAuthorId());
-      graphQL.setBody(detailed.getBody());
-      graphQL.setCreatedAt(detailed.getCreatedAt());
-      graphQL.setUpdatedAt(detailed.getUpdatedAt());
-      graphQL.setDeletedAt(detailed.getDeletedAt());
-      graphQL.setDeleted(detailed.isDeleted());
-      return graphQL;
-    }
-
-    public static PostDTO.GraphQL  toGraphQL(PostDTO.Out out){
-      PostDTO.GraphQL graphQL = new PostDTO.GraphQL();
-      graphQL.setId(out.getId());
-      graphQL.setTitle(out.getTitle());
-      graphQL.setBody(out.getBody());
-      graphQL.setCreatedAt(out.getCreatedAt());
-      graphQL.setUpdatedAt(out.getUpdatedAt());
-      graphQL.setDeletedAt(out.getDeletedAt());
-      graphQL.setDeleted(out.isDeleted());
-      return graphQL;
-    }
-
-
-      public static PaginatedData<PostDTO.GraphQL>  toGraphQL(PaginatedData<PostDTO.Out> out){
-      PaginatedData<PostDTO.GraphQL> graphQL = new PaginatedData<>();
-      graphQL.setPage(out.getPage());
-      graphQL.setPageSize(out.getPageSize());
-      graphQL.setTotal(out.getTotal());
-      graphQL.setTotalPages(out.getTotalPages());
-      graphQL.setItems(out.getItems().stream().map(Converter::toGraphQL).toList());
-
-      return graphQL;
-    }
-
-    public static PaginatedData<PostDTO.GraphQL>  fromDetaildtoGraphQL(PaginatedData<PostDTO.Detailed> detailed){
-      PaginatedData<PostDTO.GraphQL> graphQL = new PaginatedData<>();
-      graphQL.setPage(detailed.getPage());
-      graphQL.setPageSize(detailed.getPageSize());
-      graphQL.setTotal(detailed.getTotal());
-      graphQL.setTotalPages(detailed.getTotalPages());
-      graphQL.setItems(detailed.getItems().stream().map(Converter::toGraphQL).toList());
-
-      return graphQL;
-    }
-
-
 
   }
 

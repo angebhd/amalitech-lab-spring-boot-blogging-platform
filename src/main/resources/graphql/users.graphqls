@@ -1,5 +1,5 @@
 extend type Query {
-    users(page: Pageable): UserPaginated
+    users(page: Int size:Int, sortBy: [SortInput]): UserPaginated
     userById(id: Int): User
     userByUsername(username: String): User
 }
@@ -7,7 +7,7 @@ extend type Query {
 extend type Mutation {
     createUser(input: UserInput!): User
     updateUser(id: ID!, input: UserInput!): User
-    deleteUser(id: ID!): User
+    deleteUser(id: ID!): String
 }
 
 type User {

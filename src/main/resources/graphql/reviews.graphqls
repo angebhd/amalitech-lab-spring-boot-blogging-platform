@@ -1,5 +1,5 @@
 extend type Query {
-    reviews(page: Pageable): PaginatedReview
+    reviews(page: Int size:Int, sortBy: [SortInput]): PaginatedReview
     reviewById(id:ID): Review
 }
 

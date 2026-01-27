@@ -1,5 +1,5 @@
 extend type Query {
-    comments(page: Pageable): PaginatedComment
+    comments(page: Int size:Int, sortBy: [SortInput]): PaginatedComment
     commentById(id:ID!): Comment
 }
 
@@ -11,10 +11,10 @@ extend type Mutation {
 
 type Comment{
     id:ID
-    post: Post
+    postId: ID
     user: User
     body: String
-    parent: Comment
+    parentCommentId: ID
     createdAt: String
     updatedAt: String
     deletedAt: String

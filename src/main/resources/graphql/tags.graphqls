@@ -1,5 +1,5 @@
 extend type Query {
-    tags(page: Pageable): TagPaginated
+    tags(page: Int size:Int, sortBy: [SortInput]): TagPaginated
     tagById(id:Int): Tag
 }
 

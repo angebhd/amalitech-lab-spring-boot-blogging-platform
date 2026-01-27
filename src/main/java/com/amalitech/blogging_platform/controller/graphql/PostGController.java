@@ -1,12 +1,9 @@
 package com.amalitech.blogging_platform.controller.graphql;
 
 import com.amalitech.blogging_platform.dto.*;
-import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
-import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -20,46 +17,39 @@ import java.util.List;
 public class PostGController {
 
   private final PostService postService;
-  private final UserService userService;
-  private final ReviewService reviewService;
-  private final CommentService commentService;
 
   @Autowired
-  public PostGController(PostService postService, UserService userService,
-                         ReviewService reviewService, CommentService commentService) {
+  public PostGController(PostService postService) {
     this.postService = postService;
-    this.userService = userService;
-    this.reviewService = reviewService;
-    this.commentService = commentService;
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.GraphQL> posts(@Argument Integer page, @Argument Integer size) {
-    return PostDTO.Converter.toGraphQL(this.postService.get(Pageable.unpaged()));
+  public PaginatedData<PostDTO.Out> posts(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+    return this.postService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
   @QueryMapping
-  public PostDTO.GraphQL postById(@Argument Long id) {
-    return PostDTO.Converter.toGraphQL(this.postService.get(id));
-  }
-
-  @QueryMapping
-  public PaginatedData<PostDTO.GraphQL> postByAuthorId(@Argument Integer page, @Argument Integer size, @Argument Long id) {
-    return PostDTO.Converter.toGraphQL(this.postService.getByAuthorId(id, Pageable.unpaged()));
+  public PostDTO.Out postById(@Argument Long id) {
+    return this.postService.get(id);
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.GraphQL> postSearch(@Argument Integer page, @Argument Integer size, @Argument String keyword, @Argument Long tagId) {
-    return PostDTO.Converter.toGraphQL(this.postService.search(keyword, Pageable.unpaged()));
+  public PaginatedData<PostDTO.Out> postByAuthorId(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument Long id) {
+    return this.postService.getByAuthorId(id, GraphQLPageableBuilder.get(page, size, sortBy));
+  }
+
+  @QueryMapping
+  public PaginatedData<PostDTO.Out> postSearch(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument String keyword) {
+    return this.postService.search(keyword, GraphQLPageableBuilder.get(page, size, sortBy));
   }
 
   @MutationMapping
-  public PostDTO.GraphQL createPost(@Argument PostDTO.In input) {
-    return PostDTO.Converter.toGraphQL(this.postService.create(input));
+  public PostDTO.Out createPost(@Argument PostDTO.In input) {
+    return this.postService.create(input);
   }
 
   @MutationMapping
-  public PostDTO.GraphQL updatePost(@Argument Long id, @Argument PostDTO.In input) {
-    return PostDTO.Converter.toGraphQL(this.postService.update(id, input));
+  public PostDTO.Out updatePost(@Argument Long id, @Argument PostDTO.In input) {
+    return this.postService.update(id, input);
   }
 
   @MutationMapping
@@ -69,27 +59,14 @@ public class PostGController {
   }
 
   @SchemaMapping(typeName = "Post", field = "author")
-  public UserDTO.Out author(PostDTO.GraphQL post) {
-    try{
-    return this.userService.get(post.getAuthorId());
-    }catch (RessourceNotFoundException e){
-      return null;
-    }
-  }
+  public UserDTO.Out author(PostDTO.Out post) {
+    return post.getAuthor();
 
-  @SchemaMapping(typeName = "Post", field = "reviews")
-  public PaginatedData<ReviewDTO.Out> review(PostDTO.GraphQL post) {
-    return this.reviewService.getByPostId(post.getId());
   }
-
-//  @SchemaMapping(typeName = "Post", field = "comments")
-//  public List<CommentDTO.GraphQL> comment(PostDTO.GraphQL post) {
-//    return this.commentService.getByPostId(post.getId()).stream().map(CommentDTO.Converter::toGraphQL).toList();
-//  }
 
   @SchemaMapping(typeName = "Post", field = "tags")
-  public List<Tag> tags(PostDTO.GraphQL post) {
-   return List.of();
+  public List<TagDTO.Out> tags(PostDTO.Out post) {
+    return post.getTags();
   }
 
 

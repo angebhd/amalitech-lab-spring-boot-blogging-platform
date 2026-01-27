@@ -43,23 +43,8 @@ public class ReviewDTO {
 
   }
 
-  @Getter
-  @Setter
-  public static class GraphQL{
-    private Long id;
-    private Long postId;
-    private Long userId;
-    private PostDTO.GraphQL post;
-    private UserDTO.Out user;
-    private EReview rate;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime deletedAt;
-    private boolean isDeleted;
-
-  }
-
   public static class Converter{
+
    private Converter(){}
 
     public static Out toDTO(Review review){
@@ -74,32 +59,6 @@ public class ReviewDTO {
      out.setDeleted(review.isDeleted());
      return out;
     }
-
-    public static GraphQL toGraphQL(Review review){
-      GraphQL graphQL = new GraphQL();
-      graphQL.setId(review.getId());
-      graphQL.setPostId(review.getPostId());
-      graphQL.setUserId(review.getUserId());
-      graphQL.setRate(EReview.valueOf(review.getRate()));
-      graphQL.setCreatedAt(review.getCreatedAt());
-      graphQL.setUpdatedAt(review.getUpdatedAt());
-      graphQL.setDeletedAt(review.getDeletedAt());
-      graphQL.setDeleted(review.isDeleted());
-      return graphQL;
-    }
-
-    public static PaginatedData<GraphQL> toGraphQL(PaginatedData<Review> review){
-      PaginatedData<GraphQL> graphQL = new PaginatedData<>();
-      graphQL.setPageSize(review.getPageSize());
-      graphQL.setPage(review.getPage());
-      graphQL.setTotalPages(review.getTotalPages());
-      graphQL.setTotal(review.getTotal());
-      graphQL.setItems(review.getItems().stream().map(Converter::toGraphQL).toList());
-
-      return graphQL;
-    }
-
-
   }
 
 

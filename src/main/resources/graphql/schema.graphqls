@@ -17,8 +17,12 @@ type Sort {
     sorted: Boolean
 }
 
-input Pageable{
-    page: Int
-    size: Int
-    sort: String
+input SortInput {
+    field: String!
+    direction: SortDirection = ASC
+}
+
+enum SortDirection {
+    ASC
+    DESC
 }
