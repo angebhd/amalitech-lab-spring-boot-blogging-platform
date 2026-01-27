@@ -1,8 +1,8 @@
 extend type Query {
-    posts(page:Int, size:Int): PaginatedPost
+    posts(page: Pageable): PaginatedPost
     postById(id: Int): Post
-    postByAuthorId(page:Int , size:Int, id: Int): PaginatedPost
-    postSearch(page:Int , size:Int, keyword: String, tagId: Int):PaginatedPost
+    postByAuthorId(page: Pageable id: Int): PaginatedPost
+    postSearch(page: Pageable keyword: String, tagId: Int):PaginatedPost
 }
 
 extend type Mutation {
@@ -31,6 +31,9 @@ type PaginatedPost implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
 }
 
 input PostInput {

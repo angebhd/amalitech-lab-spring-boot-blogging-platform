@@ -1,5 +1,5 @@
 extend type Query {
-    tags(page: Int, size:Int): TagPaginated
+    tags(page: Pageable): TagPaginated
     tagById(id:Int): Tag
 }
 
@@ -23,6 +23,9 @@ type TagPaginated implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
 }
 
 input TagInput {

@@ -7,4 +7,18 @@ interface Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
+}
+
+type Sort {
+    empty: String
+    sorted: Boolean
+}
+
+input Pageable{
+    page: Int
+    size: Int
+    sort: String
 }

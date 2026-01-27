@@ -1,5 +1,5 @@
 extend type Query {
-    reviews(page: Int, size: Int): PaginatedReview
+    reviews(page: Pageable): PaginatedReview
     reviewById(id:ID): Review
 }
 
@@ -26,6 +26,9 @@ type PaginatedReview implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
 }
 
 input ReviewInput {

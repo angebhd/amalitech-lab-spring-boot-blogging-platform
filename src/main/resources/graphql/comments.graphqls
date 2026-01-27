@@ -1,6 +1,6 @@
 extend type Query {
-    comments(page:Int, size: Int): PaginatedComment
-    commentById(id:ID): Comment
+    comments(page: Pageable): PaginatedComment
+    commentById(id:ID!): Comment
 }
 
 extend type Mutation {
@@ -27,6 +27,9 @@ type PaginatedComment implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
 }
 
 input CommentInput {

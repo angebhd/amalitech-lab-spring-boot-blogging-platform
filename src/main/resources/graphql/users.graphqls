@@ -1,5 +1,5 @@
 extend type Query {
-    users(page : Int, size : Int): UserPaginated
+    users(page: Pageable): UserPaginated
     userById(id: Int): User
     userByUsername(username: String): User
 }
@@ -27,6 +27,9 @@ type UserPaginated implements Paginated{
     pageSize: Int
     total: Int
     totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
 
 }
 
