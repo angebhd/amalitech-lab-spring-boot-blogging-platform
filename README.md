@@ -174,3 +174,15 @@ To run with a specific profile:
 
 - **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - **GraphiQL**: [http://localhost:8080/graphiql](http://localhost:8080/graphiql)
+
+---
+
+## Testing Caching & Performance
+
+To verify the performance enhancements and caching behavior:
+
+1. **Initial Retrieval**: Perform a `GET` request to `/api/posts/{id}`. Note the response time in your API client (e.g., Postman). This triggers a database hit and populates the cache.
+2. **Cached Retrieval**: Perform the same `GET` request. The response time should drop significantly (e.g., from ~100ms to <20ms) as data is served from memory.
+3. **Cache Invalidation**: Perform a `PUT` or `DELETE` request on the same post.
+4. **Verification**: Perform the `GET` request again. For `PUT`, you should see the updated data immediately (Cache Update). For `DELETE`, the first subsequent `GET` will return a `404`, and any database logs will show the entry was evicted.
+5. **N+1 Verification**: Check the application console/logs while fetching the feed. With `@EntityGraph` enabled, you should see simplified SQL joins instead of multiple recursive queries for authors or comments.

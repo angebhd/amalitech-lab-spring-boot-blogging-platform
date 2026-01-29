@@ -16,25 +16,25 @@ Repositories extend `JpaRepository`, providing out-of-the-box CRUD operations, p
 
 While Spring Data JPA handles standard CRUD via derived query methods (e.g., `findByAuthor_Id`), complex operations use JPQL and Native SQL.
 
-### Native SQL Example: `findAllWithStats`
-To retrieve posts with aggregated counts for comments and reviews, a native SQL query is used in `PostRepository`:
+### Native SQL Examples
+
+#### 1. `findAllWithStats`
+Retrieves posts with aggregated counts for comments and reviews:
 
 ```sql
-SELECT
-  p.id AS id,
-  u.username AS authorUsername,
-  p.title AS title,
-  COUNT(DISTINCT r.id) AS reviews,
-  AVG(CASE r.rate WHEN 'ONE' THEN 1 ... END) AS reviewAverage,
-  COUNT(DISTINCT c.id) AS comments,
-  array_agg(DISTINCT t.name) AS tags
-FROM posts p
-JOIN users u ON u.id = p.author_id
-LEFT JOIN reviews r ON r.post_id = p.id
-LEFT JOIN comments c ON c.post_id = p.id
-LEFT JOIN post_tags pt ON pt.post_id = p.id
-LEFT JOIN tags t ON t.id = pt.tag_id
+SELECT p.id, u.username, COUNT(DISTINCT r.id) AS reviews, ...
+FROM posts p JOIN users u ON u.id = p.author_id ...
 GROUP BY p.id, u.id
+```
+
+#### 2. `searchWithStats`
+A complex search query that filters posts by title, body, or author attributes (username, first name, last name), while still providing aggregated statistics:
+
+```sql
+WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+   OR LOWER(p.body) LIKE LOWER(CONCAT('%', :keyword, '%'))
+   OR LOWER(u.first_name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+   ...
 ```
 
 ## Performance Optimizations
