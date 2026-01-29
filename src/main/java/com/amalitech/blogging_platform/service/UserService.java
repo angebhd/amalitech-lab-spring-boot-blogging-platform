@@ -8,6 +8,10 @@ import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.ReviewRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,11 +40,13 @@ public class UserService {
     return this.mapToUserDTO(createdUser);
   }
 
+  @Cacheable(cacheNames = "users", key = "#id")
   public UserDTO.Out get(Long id){
     User response = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     return this.mapToUserDTO(response);
   }
 
+  @Cacheable(cacheNames = "usersByUsername",  key = "#username.toLowerCase()")
   public UserDTO.Out getByUsername(String username){
     var response = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     return this.mapToUserDTO(response);
@@ -52,6 +58,15 @@ public class UserService {
   }
 
 
+  @Caching(
+          put = {
+                  @CachePut(cacheNames = "users", key = "#id"),
+                  @CachePut(cacheNames = "usersByUsername", key = "#result.username.toLowerCase()")
+          },
+          evict = {
+                  @CacheEvict(cacheNames = "usersByUsername", allEntries = true),
+          }
+  )
   public UserDTO.Out update(Long id, UserDTO.In user){
 
     User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
@@ -73,6 +88,12 @@ public class UserService {
 
 
   @Transactional
+  @Caching(
+          evict = {
+                  @CacheEvict(cacheNames = "users", key = "#id"),
+                  @CacheEvict(cacheNames = "usersByUsername", allEntries = true)
+          }
+  )
   public void delete (Long id){
     User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     this.commentRepository.deleteByUser(user);

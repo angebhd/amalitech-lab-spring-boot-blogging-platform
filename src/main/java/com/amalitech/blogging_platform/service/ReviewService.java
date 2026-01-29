@@ -11,6 +11,9 @@ import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.ReviewRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,7 @@ public class ReviewService {
     return new PaginatedData<>(this.reviewRepository.findAll(pageable).map(ReviewDTO.Converter::toDTO));
   }
 
+  @Cacheable(cacheNames = "reviews", key = "#id")
   public ReviewDTO.Out get(Long id) {
    return this.reviewRepository.findById(id).map(ReviewDTO.Converter::toDTO).orElseThrow(() -> new RessourceNotFoundException("Review not found"));
   }
@@ -44,6 +48,7 @@ public class ReviewService {
     return new PaginatedData<>(reviewRepository.findByUser_Id(userId, Pageable.unpaged()).map(ReviewDTO.Converter::toDTO));
   }
 
+  @CachePut(cacheNames = "reviews", key = "#result.id")
   public ReviewDTO.Out create(ReviewDTO.In in){
 
     var review = this.mapToReview((in));
@@ -57,6 +62,7 @@ public class ReviewService {
     return ReviewDTO.Converter.toDTO(this.reviewRepository.save(review));
   }
 
+  @CachePut(cacheNames = "reviews", key = "#id")
   public ReviewDTO.Out update(Long id, EReview eReview){
     if (eReview == null)
       throw new BadRequestException("Review cannot be null !");
@@ -66,6 +72,7 @@ public class ReviewService {
     return ReviewDTO.Converter.toDTO(this.reviewRepository.save(review));
   }
 
+  @CacheEvict(cacheNames = "reviews", key = "#id")
   public void delete(Long id){
     this.reviewRepository.deleteById(id);
   }

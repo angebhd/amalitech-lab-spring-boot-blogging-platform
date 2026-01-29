@@ -14,9 +14,10 @@ import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.ReviewRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
 import com.amalitech.blogging_platform.repository.projections.PostWithStatsProjection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class PostService {
   }
 
   @Transactional
+  @CachePut(cacheNames = "posts", key = "#result.id")
   public PostDTO.Out create(PostDTO.In postIn){
     Post post = this.mapToEntity(postIn);
 
@@ -68,6 +70,7 @@ public class PostService {
   }
 
   @Transactional
+  @CachePut(cacheNames = "posts", key = "#id")
   public PostDTO.Out update(Long id, PostDTO.In post){
     if (post.getTags().size() > 5)
       throw new BadRequestException("Post cannot have more than 5 tags");
@@ -87,6 +90,7 @@ public class PostService {
   }
 
   @Transactional
+  @CacheEvict(cacheNames = {"posts"}, key = "#id")
   public void delete(Long id){
     Post post = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Post not found"));
     this.reviewRepository.deleteByPost(post);
@@ -110,7 +114,7 @@ public class PostService {
   public PaginatedData<PostDTO.OutWithStats> getFeed(Pageable pageable){
     return new PaginatedData<>(this.postRepository.findAllWithStats(pageable).map(this::mapToWithStats));
   }
-
+  @Cacheable(cacheNames = "posts", key = "#id")
   public PostDTO.Out get(Long id){
     return this.postRepository.findById(id).map(this::mapToDTO).orElseThrow( () -> new RessourceNotFoundException("Post not found"));
   }

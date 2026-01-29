@@ -7,6 +7,10 @@ import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -63,14 +67,21 @@ public class TagService {
     return result;
   }
 
+  @Cacheable(cacheNames = "tags", key="#id")
   public TagDTO.Out get(Long id){
     return this.tagRepository.findById(id).map(TagDTO.Converter::toDTO).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
   }
-
+  @Cacheable(cacheNames = "tagsByName", key = "#name.toLowerCase()" )
   public TagDTO.Out get(String name){
     return tagRepository.findByNameIgnoreCase(name).map(TagDTO.Converter::toDTO).orElseThrow(() -> new RessourceNotFoundException("No tag with name " + name));
   }
 
+  @Caching(
+          put = {
+                  @CachePut(cacheNames = "tags", key = "#result.id"),
+                  @CachePut(cacheNames = "tagsByName", key = "#result.name.toLowerCase()")
+          }
+  )
   public TagDTO.Out create(String name){
     boolean exist = tagRepository.existsByNameIgnoreCase(name);
     if (exist){
@@ -81,6 +92,15 @@ public class TagService {
     return TagDTO.Converter.toDTO(this.tagRepository.save(t));
   }
 
+  @Caching(
+          put = {
+                  @CachePut(cacheNames = "tags", key = "#id"),
+                  @CachePut(cacheNames = "tagsByName", key = "#name.toLowerCase()")
+          },
+          evict = {
+                  @CacheEvict(cacheNames = "tagsByName", allEntries = true)
+          }
+  )
   public TagDTO.Out update(Long id, String name){
     Tag old = this.tagRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("No tag with id " + id));
 
@@ -94,6 +114,10 @@ public class TagService {
     return TagDTO.Converter.toDTO(this.tagRepository.save(old));
   }
 
+  @Caching(evict = {
+          @CacheEvict(cacheNames = "tags", key = "#tagId"),
+          @CacheEvict(cacheNames = "tagsByName", key = "#tagName")
+  })
   public void delete(Long id){
     this.tagRepository.deleteById(id);
   }

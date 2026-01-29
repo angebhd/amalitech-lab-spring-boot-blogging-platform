@@ -12,6 +12,9 @@ import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +56,7 @@ public class CommentService {
    * @return CommentDTO.Out representing the comment
    * @throws RessourceNotFoundException if the comment does not exist
    */
+  @Cacheable(cacheNames = "comments", key = "#id")
   public CommentDTO.Out get(Long id){
     return this.commentRepository.findById(id).map(this::mapToDTO).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
   }
@@ -85,6 +89,7 @@ public class CommentService {
    * @return CommentDTO.Out representing the created comment
    */
   @Transactional
+  @CachePut(cacheNames = "comments", key = "#result.id")
   public CommentDTO.Out create(CommentDTO.In in){
     Comment comment = new Comment();
     comment.setBody(in.getBody());
@@ -111,6 +116,7 @@ public class CommentService {
    * @return CommentDTO.Out representing the updated comment
    * @throws RessourceNotFoundException if the comment does not exist
    */
+  @CachePut(cacheNames = "comments", key = "#id")
   public CommentDTO.Out update (Long id, String body){
     Comment old = this.commentRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
     old.setBody(body);
@@ -123,6 +129,7 @@ public class CommentService {
    * @param id ID of the comment to delete
    */
   @Transactional
+  @CacheEvict(cacheNames = "comments", key = "#id")
   public void delete (Long id){
     Comment comment = this.commentRepository.findById(id).orElseThrow(() -> new DataConflictException("Comment not found"));
     if(!comment.getChildren().isEmpty()){
