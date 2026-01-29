@@ -59,7 +59,7 @@ public class PostDTO {
   @Setter
   @Schema(name = "PostDTOutWithStats", description = "Contains Post information with stats")
   public static class OutWithStats extends Out{
-    private Long revieww;
+    private Long reviews;
     private Float reviewAverage;
     private Long comments;
   }

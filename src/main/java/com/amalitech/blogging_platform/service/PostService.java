@@ -157,7 +157,7 @@ public class PostService {
     dto.setDeletedAt(p.getDeletedAt());
     dto.setDeleted(p.getIsDeleted());
 
-    dto.setRevieww(p.getReviews());
+    dto.setReviews(p.getReviews());
     dto.setReviewAverage(p.getReviewAverage().floatValue());
     dto.setComments(p.getComments());
 

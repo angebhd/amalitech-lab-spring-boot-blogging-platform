@@ -2,7 +2,7 @@ extend type Query {
     posts(page: Int size:Int, sortBy: [SortInput]): PaginatedPost
     postById(id: Int): Post
     postByAuthorId(page: Int size:Int, sortBy: [SortInput] id: Int): PaginatedPost
-    postSearch(page: Int size:Int, sortBy: [SortInput] keyword: String, tagId: Int):PaginatedPost
+    postSearch(page: Int size:Int, sortBy: [SortInput] keyword: String):PaginatedPostWithStat
 }
 
 extend type Mutation {
@@ -23,8 +23,39 @@ type Post {
     isDeleted: Boolean
 }
 
+type PostWithStats {
+
+    id: ID
+    author: User
+    Tags: String
+    title: String
+    body: String
+    createdAt: String
+    updatedAt: String
+    deletedAt: String
+    isDeleted: Boolean
+
+    reviews: Int
+    comments: Int
+    reviewAverage: Float
+}
+
+
+
+
 type PaginatedPost implements Paginated{
     items: [Post]
+    page: Int
+    pageSize: Int
+    total: Int
+    totalPages: Int
+    isFirstPage: Boolean
+    isLastPage: Boolean
+    sort: Sort
+}
+
+type PaginatedPostWithStat implements Paginated{
+    items: [PostWithStats]
     page: Int
     pageSize: Int
     total: Int
