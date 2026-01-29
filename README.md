@@ -9,10 +9,10 @@ A web-based blogging platform built with **Spring Boot** and **PostgreSQL**. The
 The platform follows a layered architecture to ensure separation of concerns and maintainability:
 
 - **Presentation Layer**: Exposes data via **REST controllers** and **GraphQL resolvers**.
-- **Service Layer**: Implements core business logic, including **Argon2-based password hashing** and transaction coordination.
-- **Data Access Layer (DAO)**: Handles persistence using manual **JDBC** with **PostgreSQL**, utilizing optimized SQL queries and custom mappers.
+- **Service Layer**: Implements core business logic, including **Argon2-based password hashing**, **Spring Cache** abstraction, and **Transaction Management**.
+- **Data Access Layer**: Handles persistence using **Spring Data JPA** with **PostgreSQL**, utilizing repository abstraction and custom JPQL/Native queries.
 - **Cross-Cutting Concerns**: Uses **Spring AOP** for logging, performance monitoring, and centralized error handling via `@ControllerAdvice`.
-- **Domain Model**: Defines core entities (User, Post, Comment, Tag, Review).
+- **Domain Model**: Defines core entities (User, Post, Comment, Tag, Review) with JPA annotations.
 
 ---
 
@@ -31,13 +31,13 @@ Spring's IoC container manages the lifecycle and configuration of application ob
 ### 2. Model-View-Controller (MVC) Pattern
 The application follows the classic MVC separation of concerns:
 - **Controller (View/Interface)**: Handles incoming HTTP requests, validates input using DTOs, and invokes business logic.
-- **Service (Model Logic)**: Contains the core business rules and transaction boundaries. It orchestrates calls to the Data Access Layer.
-- **DAO (Model Data)**: The Data Access Object layer handles direct interactions with the PostgreSQL database using JDBC, abstracting the SQL complexity from the service layer.
+- **Service (Model Logic)**: Contains the core business rules, transaction boundaries (`@Transactional`), and caching logic. It orchestrates calls to the Data Access Layer.
+- **Repository (Model Data)**: The Spring Data JPA layer provides an abstraction over the PostgreSQL database, automating CRUD operations and supporting complex query derivation.
 
 ### 3. Aspect-Oriented Programming (AOP)
 Cross-cutting concerns are modularized using Spring AOP, preventing code duplication in business methods.
 - **Logging**: The `LoggingAspect` automatically logs method entry, exit, arguments, and exceptions for all service methods.
-- **Monitoring**: The `PerformanceAspect` tracks basic execution metrics, logging warnings for slow methods (>1s) to aid in performance tuning.
+- **Monitoring**: The `PerformanceAspect` tracks execution metrics, providing insights into method performance and aid in optimization.
 
 ### 4. GraphQL Overview
 In addition to REST, the platform offers a GraphQL API to provide clients with flexible data fetching capabilities.
@@ -57,13 +57,15 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
   - **GraphQL Integration**: Flexible data fetching for complex requirements. [Read more](docs/graphql.md).
 - **Security**: 
   - **Argon2 Hashing**: Industry-standard password hashing for user security.
-- **Advanced Data Operations**:
-  - **Manual Pagination**: Database-level pagination implemented in DAOs.
-  - **Soft Deletion**: All entities support soft deletion (marking records as deleted without removing them).
+- **Persistence & Performance**:
+  - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence.md).
+  - **Spring Cache**: Improving read performance for popular posts and users. [Read more](docs/caching.md).
+  - **Transaction Management**: Ensuring data consistency with `@Transactional`.
+  - **Database-Level Pagination**: Efficient data retrieval using `Pageable`.
 - **Quality & Monitoring**:
   - **Validation**: Strict input validation using Bean Validation.
   - **AOP Monitoring**: Automated logging and performance tracking. [Read more](docs/aop.md).
-  - **Performance Metrics**: Real-time tracking of execution time for critical methods.
+  - **Performance Benchmarking**: Detailed analysis of query and cache optimizations. [Read more](docs/performance-report.md).
   - **OpenAPI Documentation**: Interactive API testing with Swagger UI.
 
 ---
@@ -74,21 +76,23 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 .
 ├── docs/                             # Documentation & SQL scripts
 │   ├── aop.md                       # AOP Implementation details
+│   ├── caching.md                   # Spring Cache strategy
 │   ├── database-design.md           # Conceptual, Logical, & Physical models
 │   ├── graphql.md                   # GraphQL Integration details
 │   ├── performance-report.md        # Benchmarking & Optimization analysis
+│   ├── persistence.md               # Spring Data JPA & Repository details
 │   ├── script.sql                   # Schema creation script
 │   └── feedDB.sql                   # Sample data script
 ├── src/main/java/com/amalitech/blogging_platform/
 │   ├── BloggingPlatformApplication.java # Spring Boot Entry Point
 │   ├── aspect/                      # AOP Aspects (Logging, Performance)
-│   ├── config/                      # Configuration (OpenAPI, etc.)
+│   ├── config/                      # Configuration (OpenAPI, Cache, etc.)
 │   ├── controller/                  # REST Controllers & GraphQL Resolvers
-│   ├── dao/                         # JDBC Data Access Objects
 │   ├── dto/                         # Data Transfer Objects
 │   ├── exceptions/                  # Global Exception Handlers
-│   ├── model/                       # Entity Definitions
-│   └── service/                     # Business Logic Layer
+│   ├── model/                       # JPA Entity Definitions
+│   ├── repository/                  # Spring Data Repositories
+│   └── service/                     # Business Logic & Transactions
 ├── src/main/resources/              # Assets & Configuration
 │   ├── graphql/                     # GraphQL Schemas (.graphqls)
 │   ├── application.yaml             # Main Configuration (uses .env)
@@ -101,10 +105,10 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 ## Tech Stack & Dependencies
 
 ### Core Technologies
-- **Framework**: Spring Boot 4.0.1 (preview)
+- **Framework**: Spring Boot 3.x (Spring Data JPA, Spring Cache)
 - **Language**: Java 21
 - **Database**: PostgreSQL 16+
-- **API**: REST & GraphQL
+- **API**: REST (OpenAPI) & GraphQL
 - **Security**: Argon2 JVM
 
 ### Key Dependencies
