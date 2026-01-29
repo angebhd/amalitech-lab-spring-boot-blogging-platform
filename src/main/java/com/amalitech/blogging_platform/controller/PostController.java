@@ -41,6 +41,16 @@ public class PostController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("feed")
+  @Operation(summary = "Get a posts for feed (with stats) in a paginated format")
+  @ApiResponse(responseCode= "200", description = "Posts retrieved")
+  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.OutWithStats>>> getPostFeed(@ParameterObject Pageable page){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.postService.getFeed(page));
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("{id}")
   @Operation(summary = "Get a specific post")
   @ApiResponse(responseCode= "200", description = "Post retrieved")
@@ -86,7 +96,7 @@ public class PostController {
   }
 
   @PutMapping("{id}")
-  @Operation(summary = "Update  a post, the tags are ignored, use the /api/post/tag to update tags")
+  @Operation(summary = "Update  a post")
   @ApiResponse(responseCode= "200", description = "review updated")
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))

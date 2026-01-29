@@ -5,6 +5,7 @@ import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
+import com.amalitech.blogging_platform.model.BaseEntity;
 import com.amalitech.blogging_platform.model.Comment;
 import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
@@ -121,7 +122,12 @@ public class CommentService {
    *
    * @param id ID of the comment to delete
    */
+  @Transactional
   public void delete (Long id){
+    Comment comment = this.commentRepository.findById(id).orElseThrow(() -> new DataConflictException("Comment not found"));
+    if(!comment.getChildren().isEmpty()){
+      commentRepository.deleteAllByIdInBatch(comment.getChildren().stream().map(BaseEntity::getId).toList());
+    }
     this.commentRepository.deleteById(id);
   }
 

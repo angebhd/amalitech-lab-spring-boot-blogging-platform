@@ -19,11 +19,11 @@ public class Comment extends BaseEntity{
   @JoinColumn(name = "post_id", nullable = false)
   private Post post;
 
-  @ManyToOne(fetch = FetchType.LAZY,  optional = false)
+  @ManyToOne(fetch = FetchType.EAGER,  optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Lob
+  @Column(nullable = false, columnDefinition = "text")
   private String body;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -4,19 +4,30 @@ import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
+import com.amalitech.blogging_platform.repository.CommentRepository;
+import com.amalitech.blogging_platform.repository.PostRepository;
+import com.amalitech.blogging_platform.repository.ReviewRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
   private final PasswordHashService passwordHashService;
   private final UserRepository userRepository;
+  private final PostRepository postRepository;
+  private final CommentRepository commentRepository;
+  private final ReviewRepository reviewRepository;
   private static final String USERNOTFOUNDMESSAGE = "User not found";
 
-  public UserService(UserRepository userRepository, PasswordHashService passwordHashService) {
+  public UserService(UserRepository userRepository, PasswordHashService passwordHashService, PostRepository postRepository,
+                     CommentRepository commentRepository, ReviewRepository reviewRepository) {
     this.userRepository = userRepository;
     this.passwordHashService = passwordHashService;
+    this.postRepository = postRepository;
+    this.commentRepository = commentRepository;
+    this.reviewRepository = reviewRepository;
   }
 
 
@@ -61,10 +72,14 @@ public class UserService {
   }
 
 
+  @Transactional
   public void delete (Long id){
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    this.commentRepository.deleteByUser(user);
+    this.postRepository.deleteByAuthor(user);
+    this.reviewRepository.deleteByUser(user);
     this.userRepository.deleteById(id);
   }
-
 
   private User mapToUser(UserDTO.In in){
     User user = new User();

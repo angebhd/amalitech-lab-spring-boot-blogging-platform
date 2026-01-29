@@ -9,14 +9,18 @@ import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Post;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.model.User;
+import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
+import com.amalitech.blogging_platform.repository.ReviewRepository;
 import com.amalitech.blogging_platform.repository.UserRepository;
+import com.amalitech.blogging_platform.repository.projections.PostWithStatsProjection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,19 +33,23 @@ import java.util.List;
 @Service
 public class PostService {
 
-  private static final Logger log = LoggerFactory.getLogger(PostService.class);
   private final PostRepository postRepository;
   private final TagService tagService;
   private final UserRepository userRepository;
+  private final CommentRepository commentRepository;
+  private final ReviewRepository reviewRepository;
 
   @Autowired
-  public PostService(PostRepository postRepository, UserRepository userRepository, TagService tagService ) {
+  public PostService(PostRepository postRepository, UserRepository userRepository, TagService tagService,
+                     CommentRepository commentRepository, ReviewRepository reviewRepository) {
     this.postRepository = postRepository;
     this.userRepository = userRepository;
     this.tagService = tagService;
-
+    this.commentRepository = commentRepository;
+    this.reviewRepository = reviewRepository;
   }
 
+  @Transactional
   public PostDTO.Out create(PostDTO.In postIn){
     Post post = this.mapToEntity(postIn);
 
@@ -59,6 +67,7 @@ public class PostService {
     return  this.mapToDTO(savedPost);
   }
 
+  @Transactional
   public PostDTO.Out update(Long id, PostDTO.In post){
     if (post.getTags().size() > 5)
       throw new BadRequestException("Post cannot have more than 5 tags");
@@ -77,8 +86,12 @@ public class PostService {
     return this.mapToDTO(this.postRepository.save(oldPost));
   }
 
+  @Transactional
   public void delete(Long id){
-    this.postRepository.deleteById(id);
+    Post post = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Post not found"));
+    this.reviewRepository.deleteByPost(post);
+    this.commentRepository.deleteByPost(post);
+    this.postRepository.delete(post);
   }
 
   // TODO: correct this
@@ -91,9 +104,11 @@ public class PostService {
 
   public PaginatedData<PostDTO.Out> get (Pageable pageable){
     var data = this.postRepository.findAll(pageable).map(this::mapToDTO);
-    log.warn("Number of items: {}",data.get().toList().size());
     return new PaginatedData<>(data);
+  }
 
+  public PaginatedData<PostDTO.OutWithStats> getFeed(Pageable pageable){
+    return new PaginatedData<>(this.postRepository.findAllWithStats(pageable).map(this::mapToWithStats));
   }
 
   public PostDTO.Out get(Long id){
@@ -127,5 +142,36 @@ public class PostService {
     post.setBody(in.getBody());
     return post;
   }
+
+  private PostDTO.OutWithStats mapToWithStats(PostWithStatsProjection p) {
+
+    var dto = new PostDTO.OutWithStats();
+
+    dto.setId(p.getId());
+    dto.setTitle(p.getTitle());
+    dto.setBody(p.getBody());
+    dto.setCreatedAt(p.getCreatedAt());
+    dto.setUpdatedAt(p.getUpdatedAt());
+    dto.setDeletedAt(p.getDeletedAt());
+    dto.setDeleted(p.getIsDeleted());
+
+    dto.setRevieww(p.getReviews());
+    dto.setReviewAverage(p.getReviewAverage().floatValue());
+    dto.setComments(p.getComments());
+
+    dto.setTags(List.of(p.getTags()));
+
+    var author = new UserDTO.Out();
+    author.setId(p.getAuthorId());
+    author.setUsername(p.getAuthorUsername());
+    author.setEmail(p.getAuthorEmail());
+    author.setFirstName(p.getAuthorFirstName());
+    author.setFirstName(p.getAuthorFirstName());
+
+    dto.setAuthor(author);
+
+    return dto;
+  }
+
 
 }

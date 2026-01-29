@@ -46,13 +46,22 @@ public class PostDTO {
   public static class Out {
     private Long id;
     private UserDTO.Out author;
-    private List<TagDTO.Out> tags;
+    private List<String> tags;
     private String title;
     private String body;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
     private boolean isDeleted;
+  }
+
+  @Getter
+  @Setter
+  @Schema(name = "PostDTOutWithStats", description = "Contains Post information with stats")
+  public static class OutWithStats extends Out{
+    private Long revieww;
+    private Float reviewAverage;
+    private Long comments;
   }
 
 
@@ -64,7 +73,7 @@ public class PostDTO {
       dto.setId(post.getId());
       dto.setTitle(post.getTitle());
       dto.setAuthor(UserDTO.Converter.toDTO(post.getAuthor()));
-      dto.setTags(post.getTags().stream().map(TagDTO.Converter::toDTO).toList());
+      dto.setTags(post.getTags().stream().map(Tag::getName).toList());
       dto.setBody(post.getBody());
       dto.setCreatedAt(post.getCreatedAt());
       dto.setUpdatedAt(post.getUpdatedAt());

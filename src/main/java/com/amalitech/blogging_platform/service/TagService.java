@@ -6,7 +6,6 @@ import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.Tag;
 import com.amalitech.blogging_platform.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class TagService {
     return new PaginatedData<>(this.tagRepository.findAll(page).map(TagDTO.Converter::toDTO));
   }
 
-  @Transactional
   List<Tag> getOrCreateTags(List<String> tagNames) {
 
     if (tagNames == null || tagNames.isEmpty())
@@ -46,6 +44,7 @@ public class TagService {
     List<Tag> result = new ArrayList<>();
 
     //Looping through the TagNames to see if they were found, if they were not, create them
+    List<Tag> tagToSave = new ArrayList<>();
     for (String name : tagNames) {
       String key = name.toLowerCase();
       if (existingMap.containsKey(key)) {
@@ -53,10 +52,14 @@ public class TagService {
       } else {
         Tag newTag = new Tag();
         newTag.setName(name);
-        tagRepository.save(newTag);
-        result.add(newTag);
+        tagToSave.add(newTag);
       }
     }
+    // batch save & Add to result
+    if(!tagToSave.isEmpty()){
+      result.addAll(tagRepository.saveAll(tagToSave));
+    }
+
     return result;
   }
 

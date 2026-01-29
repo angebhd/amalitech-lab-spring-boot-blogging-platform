@@ -65,7 +65,7 @@ public class PostGController {
   }
 
   @SchemaMapping(typeName = "Post", field = "tags")
-  public List<TagDTO.Out> tags(PostDTO.Out post) {
+  public List<String> tags(PostDTO.Out post) {
     return post.getTags();
   }
 
