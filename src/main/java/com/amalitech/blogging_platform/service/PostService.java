@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,12 +97,11 @@ public class PostService {
     this.postRepository.delete(post);
   }
 
-  // TODO: correct this
-  public PaginatedData<PostDTO.Out> search(String keyword, Pageable pageable){
+  public PaginatedData<PostDTO.OutWithStats> search(String keyword, Pageable pageable){
     Post post = new Post();
     post.setTitle(keyword);
     post.setTitle(keyword);
-    return new PaginatedData<>(this.postRepository.findAll(Example.of(post), pageable).map(this::mapToDTO));
+    return new PaginatedData<>(this.postRepository.searchWithStats(keyword, pageable).map(this::mapToWithStats));
   }
 
   public PaginatedData<PostDTO.Out> get (Pageable pageable){

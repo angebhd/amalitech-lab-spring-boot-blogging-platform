@@ -38,7 +38,7 @@ public class PostGController {
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.Out> postSearch(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument String keyword) {
+  public PaginatedData<PostDTO.OutWithStats> postSearch(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument String keyword) {
     return this.postService.search(keyword, GraphQLPageableBuilder.get(page, size, sortBy));
   }
 

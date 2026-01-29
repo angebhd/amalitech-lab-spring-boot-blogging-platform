@@ -79,8 +79,8 @@ public class PostController {
   @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.Out>>> search(@ParameterObject Pageable page, @RequestParam(required = false) String keyword ){
-    GenericResponse<PaginatedData<PostDTO.Out>> response = new GenericResponse<>(HttpStatus.OK, this.postService.search(keyword, page));
+  public ResponseEntity<GenericResponse<PaginatedData<PostDTO.OutWithStats>>> search(@ParameterObject Pageable page, @RequestParam(required = false) String keyword ){
+    GenericResponse<PaginatedData<PostDTO.OutWithStats>> response = new GenericResponse<>(HttpStatus.OK, this.postService.search(keyword, page));
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
