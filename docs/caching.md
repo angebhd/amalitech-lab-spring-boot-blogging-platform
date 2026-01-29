@@ -44,5 +44,13 @@ public void delete(Long id) { ... }
 - **Read Latency**: Significant reduction (typically <10ms for cached hits vs ~100ms for database queries).
 - **Scalability**: Reduces the number of hits on the PostgreSQL database, allowing the system to handle more concurrent readers.
 
-> [!TIP]
-> Future enhancements could include integrating **Redis** as a distributed cache provider for multi-node deployments.
+## Strategic Caching Decisions
+
+### Why Not Cache Paginated Elements?
+While caching `getFeed` or other paginated results could provide immediate performance boosts, we deliberately avoided this in the final implementation due to several architectural constraints:
+
+1.  **Cache Invalidation Complexity**: Invalidating a specific page when a single post is added, updated, or deleted is non-trivial. A change on page 5 might shift items across all subsequent pages, requiring a full cache eviction of all paginated feed entries to maintain consistency.
+2.  **State Management**: Caching results with different `Pageable` parameters (size, page number, sorting) leads to a combinatorial explosion of cache keys, potentially consuming significant memory with redundant data.
+3.  **Consistency vs. Performance**: In a dynamic blogging platform, users expect to see new posts or updates immediately in their feed. The overhead of managing consistent paginated caches often outweighs the benefits, especially when optimized JPA queries (like those using `@EntityGraph`) already provide acceptable performance.
+
+Instead, we focus on caching **individual entities** by ID, which offers the best balance of high-speed retrieval and simple, reliable invalidation.
