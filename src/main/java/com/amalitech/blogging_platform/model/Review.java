@@ -22,7 +22,7 @@ public class Review extends BaseEntity {
   @Transient
   private Long userId;
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.REMOVE)
+  @ManyToOne(fetch = FetchType.EAGER, optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
