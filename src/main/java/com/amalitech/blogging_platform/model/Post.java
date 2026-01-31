@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "posts")
 @SQLDelete(sql = "UPDATE posts SET is_deleted = true, deleted_at = NOW() WHERE id=?")
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 public class Post extends  BaseEntity {

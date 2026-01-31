@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "reviews")
 @SQLDelete(sql = "UPDATE reviews SET is_deleted = true, deleted_at = NOW() WHERE id=?")
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 public class Review extends BaseEntity {
