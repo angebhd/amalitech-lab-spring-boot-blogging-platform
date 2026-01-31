@@ -56,3 +56,27 @@ The Service Layer uses `@Transactional` to ensure atomicity for multi-step opera
 
 - **Rollback Behavior**: Transactions are automatically rolled back if a `RuntimeException` occurs.
 - **Read-Only Transactions**: Optimization for read-heavy methods (optional but recommended).
+
+---
+
+## Database Migrations with Flyway
+
+While **Spring Data JPA** is excellent for abstracting CRUD operations, it is **not recommended for managing database schema migrations** in production environments. Instead, we use **Flyway** for version-controlled, reliable schema management.
+
+### Why Flyway?
+- **Version Control**: Each migration is stored as a versioned SQL script, enabling full audit trails.
+- **Consistency**: Ensures all environments (dev, test, prod) have identical schemas.
+- **Safety**: Flyway validates migration checksums to prevent unauthorized changes.
+- **Simplicity**: Migrations run automatically on application startup.
+
+### Migration Files
+Migrations are stored in `src/main/resources/db/migration/` and follow the naming convention `V{version}__{description}.sql`:
+
+- **`V001__init_tables.sql`**: Initial schema creation (users, posts, comments, tags, reviews, and relationships).
+- **`V002__feed_database.sql`**: Sample data population for testing and development.
+
+### Best Practices
+1. **Never modify existing migration files** after they've been applied. Create a new migration instead.
+2. **Test migrations locally** before deploying to production.
+3. **Use descriptive names** for migration files to clarify intent.
+4. **Disable JPA auto-DDL** in production (`spring.jpa.hibernate.ddl-auto=validate`) to prevent unintended schema changes.

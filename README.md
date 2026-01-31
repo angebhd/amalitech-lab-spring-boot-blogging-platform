@@ -10,7 +10,7 @@ The platform follows a layered architecture to ensure separation of concerns and
 
 - **Presentation Layer**: Exposes data via **REST controllers** and **GraphQL resolvers**.
 - **Service Layer**: Implements core business logic, including **Argon2-based password hashing**, **Spring Cache** abstraction, and **Transaction Management**.
-- **Data Access Layer**: Handles persistence using **Spring Data JPA** with **PostgreSQL**, utilizing repository abstraction and custom JPQL/Native queries.
+- **Data Access Layer**: Handles persistence using **Spring Data JPA** with **PostgreSQL**, utilizing repository abstraction and custom JPQL/Native queries. **Flyway** manages schema migrations.
 - **Cross-Cutting Concerns**: Uses **Spring AOP** for logging, performance monitoring, and centralized error handling via `@ControllerAdvice`.
 - **Domain Model**: Defines core entities (User, Post, Comment, Tag, Review) with JPA annotations.
 
@@ -59,6 +59,7 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
   - **Argon2 Hashing**: Industry-standard password hashing for user security.
 - **Persistence & Performance**:
   - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence.md).
+  - **Flyway Migrations**: Version-controlled database schema management.
   - **Spring Cache**: Improving read performance for popular posts and users. [Read more](docs/caching.md).
   - **Transaction Management**: Ensuring data consistency with `@Transactional`.
   - **Database-Level Pagination**: Efficient data retrieval using `Pageable`.
@@ -94,6 +95,10 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 │   ├── repository/                  # Spring Data Repositories
 │   └── service/                     # Business Logic & Transactions
 ├── src/main/resources/              # Assets & Configuration
+│   ├── db/
+│   │   └── migration/               # Flyway migration scripts
+│   │       ├── V001__init_tables.sql
+│   │       └── V002__feed_database.sql
 │   ├── graphql/                     # GraphQL Schemas (.graphqls)
 │   ├── application.yaml             # Main Configuration (uses .env)
 │   └── application-dev.yaml         # Dev Profile
@@ -112,7 +117,8 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 - **Security**: Argon2 JVM
 
 ### Key Dependencies
-- **Spring Web / GraphQL / Validation / AOP**: Core Spring components.
+- **Spring Web / GraphQL / Validation / AOP / Data JPA / Cache**: Core Spring components.
+- **Flyway**: Database migration management and version control.
 - **Argon2 JVM**: For secure password hashing.
 - **Dotenv-Java**: For environment variable management.
 - **Lombok**: Boilerplate reduction.
@@ -161,11 +167,12 @@ To run with a specific profile:
 
 ### 3. Database Initialization
 1. Create a database named `blogging`.
-2. Run the schema and seed scripts:
-   ```bash
-   psql -d blogging -f docs/script.sql
-   psql -d blogging -f docs/feedDB.sql
-   ```
+2. Flyway will automatically run migrations on application startup:
+   - `V001__init_tables.sql`: Creates all database tables and constraints.
+   - `V002__feed_database.sql`: Populates sample data for testing.
+
+> [!NOTE]
+> Manual SQL script execution is no longer required. Flyway manages all schema changes through versioned migration files in `src/main/resources/db/migration/`.
 
 ### 4. Running the App
 ```bash
