@@ -53,6 +53,28 @@ public class CommentController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @GetMapping("post/{id}")
+  @Operation(summary = "Get a comments by post")
+  @ApiResponse(responseCode= "200", description = "Post retrieved")
+  @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<PaginatedData<CommentDTO.Out>>> getCommentByPosts(@PathVariable Long id, @ParameterObject Pageable pageable){
+    GenericResponse<PaginatedData<CommentDTO.Out>> response = new GenericResponse<>(HttpStatus.OK, this.commentService.getByPostId(id, pageable));
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  @GetMapping("user/{id}")
+  @Operation(summary = "Get a comments by users")
+  @ApiResponse(responseCode= "200", description = "Post retrieved")
+  @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<PaginatedData<CommentDTO.Out>>> getCommentByUser(@PathVariable Long id, @ParameterObject Pageable pageable){
+    GenericResponse<PaginatedData<CommentDTO.Out>> response = new GenericResponse<>(HttpStatus.OK, this.commentService.getByUserId(id, pageable));
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
   @PostMapping()
   @Operation(summary = "Create a new comment")
   @ApiResponse(responseCode= "201", description = "Comment created")

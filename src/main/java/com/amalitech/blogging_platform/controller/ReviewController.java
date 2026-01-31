@@ -43,6 +43,26 @@ public class ReviewController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("post/{id}")
+  @Operation(summary = "Get a reviews in a paginated format")
+  @ApiResponse(responseCode= "200", description = "Reviews retrieved")
+  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReviewByPost(@PathVariable Long id, @ParameterObject Pageable pageable){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.reviewService.getByPostId(id, pageable));
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("user/{id}")
+  @Operation(summary = "Get a reviews in a paginated format")
+  @ApiResponse(responseCode= "200", description = "Reviews retrieved")
+  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReviewByUser(@PathVariable Long id, @ParameterObject Pageable pageable){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.reviewService.getByUserId(id, pageable));
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("{id}")
   @Operation(summary = "Get a specific review")
   @ApiResponse(responseCode= "200", description = "review retrieved")

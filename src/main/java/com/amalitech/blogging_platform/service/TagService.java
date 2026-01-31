@@ -115,8 +115,8 @@ public class TagService {
   }
 
   @Caching(evict = {
-          @CacheEvict(cacheNames = "tags", key = "#tagId"),
-          @CacheEvict(cacheNames = "tagsByName", key = "#tagName")
+          @CacheEvict(cacheNames = "tags", key = "#id"),
+          @CacheEvict(cacheNames = "tagsByName", allEntries = true)
   })
   public void delete(Long id){
     this.tagRepository.deleteById(id);

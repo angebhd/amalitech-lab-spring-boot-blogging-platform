@@ -69,8 +69,8 @@ public class TagController {
   }
 
   @DeleteMapping("{id}")
-  @Operation(summary = "Create tags")
-  @ApiResponse(responseCode= "201", description = "Tags created")
+  @Operation(summary = "Delete tags")
+  @ApiResponse(responseCode= "20o", description = "Tags deleted")
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<Object>> delete(@PathVariable Long id){

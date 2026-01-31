@@ -40,12 +40,12 @@ public class ReviewService {
   }
 
 
-  public PaginatedData<ReviewDTO.Out> getByPostId(Long postId){
-    return new PaginatedData<>(reviewRepository.findByPost_Id(postId, Pageable.unpaged()).map(ReviewDTO.Converter::toDTO));
+  public PaginatedData<ReviewDTO.Out> getByPostId(Long postId, Pageable pageable){
+    return new PaginatedData<>(reviewRepository.findByPost_Id(postId, pageable).map(ReviewDTO.Converter::toDTO));
   }
 
-  public PaginatedData<ReviewDTO.Out> getByUserId(Long userId){
-    return new PaginatedData<>(reviewRepository.findByUser_Id(userId, Pageable.unpaged()).map(ReviewDTO.Converter::toDTO));
+  public PaginatedData<ReviewDTO.Out> getByUserId(Long userId, Pageable pageable){
+    return new PaginatedData<>(reviewRepository.findByUser_Id(userId, pageable).map(ReviewDTO.Converter::toDTO));
   }
 
   @CachePut(cacheNames = "reviews", key = "#result.id")

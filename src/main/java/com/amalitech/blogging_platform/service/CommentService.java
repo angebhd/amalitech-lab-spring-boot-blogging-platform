@@ -67,8 +67,8 @@ public class CommentService {
    * @param postId ID of the post
    * @return list of CommentDTO.Out for the post
    */
-  public PaginatedData<CommentDTO.Out> getByPostId(Long postId){
-    return new PaginatedData<>(commentRepository.findByPost_Id(postId, Pageable.unpaged()).map(this::mapToDTO));
+  public PaginatedData<CommentDTO.Out> getByPostId(Long postId, Pageable pageable){
+    return new PaginatedData<>(commentRepository.findByPost_Id(postId, pageable).map(this::mapToDTO));
   }
 
   /**
@@ -77,8 +77,8 @@ public class CommentService {
    * @param userId ID of the user
    * @return list of Comment entities
    */
-  public PaginatedData<CommentDTO.Out> getByUserId(Long userId){
-    return new PaginatedData<>(commentRepository.findByUser_Id(userId, Pageable.unpaged()).map(this::mapToDTO));
+  public PaginatedData<CommentDTO.Out> getByUserId(Long userId, Pageable pageable){
+    return new PaginatedData<>(commentRepository.findByUser_Id(userId, pageable).map(this::mapToDTO));
   }
 
 
