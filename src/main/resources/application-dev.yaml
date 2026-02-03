@@ -27,3 +27,6 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+jwt:
+  secret: ${JWT_SECRET}

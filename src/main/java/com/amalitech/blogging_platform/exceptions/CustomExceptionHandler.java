@@ -53,6 +53,11 @@ public class CustomExceptionHandler {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
     log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-
  }
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorizedtException(BadRequestException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
 }

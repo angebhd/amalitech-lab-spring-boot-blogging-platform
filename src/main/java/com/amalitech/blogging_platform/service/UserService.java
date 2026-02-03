@@ -13,22 +13,23 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
-  private final PasswordHashService passwordHashService;
+  private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final ReviewRepository reviewRepository;
   private static final String USERNOTFOUNDMESSAGE = "User not found";
 
-  public UserService(UserRepository userRepository, PasswordHashService passwordHashService, PostRepository postRepository,
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PostRepository postRepository,
                      CommentRepository commentRepository, ReviewRepository reviewRepository) {
     this.userRepository = userRepository;
-    this.passwordHashService = passwordHashService;
+    this.passwordEncoder = passwordEncoder;
     this.postRepository = postRepository;
     this.commentRepository = commentRepository;
     this.reviewRepository = reviewRepository;
@@ -104,7 +105,7 @@ public class UserService {
 
   private User mapToUser(UserDTO.In in){
     User user = new User();
-    String hashedPassword = this.passwordHashService.hash(in.getPassword().toCharArray());
+    String hashedPassword = this.passwordEncoder.encode(in.getPassword());
     user.setFirstName(in.getFirstName());
     user.setLastName(in.getLastName());
     user.setUsername(in.getUsername());
