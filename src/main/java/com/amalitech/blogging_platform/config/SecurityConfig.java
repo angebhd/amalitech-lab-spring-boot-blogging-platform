@@ -33,13 +33,14 @@ public class SecurityConfig {
                     httpRequest -> httpRequest
                             .requestMatchers("/api/v1/auth/**").permitAll()
                             .requestMatchers("/swagger-ui/**").permitAll()
+                            .requestMatchers("/graphiql").permitAll()
                             .requestMatchers("/v3/api-docs/**").permitAll()
                             .requestMatchers("/api/v1/post/feed").permitAll()
                             .anyRequest().authenticated()
             )
             .oauth2Login(oauth -> oauth
                     .defaultSuccessUrl("/api/v1/auth/login/oauth2/success", true)
-                    .authorizationEndpoint( url -> url.baseUri("/api/v1/auth/oauth2/"))
+                    .authorizationEndpoint( url -> url.baseUri("/api/v1/auth/oauth2"))
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

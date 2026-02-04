@@ -18,20 +18,26 @@ import java.util.UUID;
 public class AuthService {
 
   private final UserRepository userRepository;
+  private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final JWTService jwtService;
 
 
   @Autowired
-  public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTService jwtService) {
+  public AuthService(UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder, JWTService jwtService) {
     this.userRepository = userRepository;
+    this.userService = userService;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
   }
 
+  public UserDTO.Out signup(UserDTO.In in) {
+    return this.userService.create(in);
+  }
+
   public AuthDTO.LoginResponse login(AuthDTO.LoginDTO loginDTO) {
-    User user = userRepository.findByUsernameIgnoreCase(loginDTO.getUsername()).orElseThrow(() -> new UnauthorizedException("user not found"));
-    boolean passwordMatch = passwordEncoder.matches(loginDTO.getPassword(), user.getPassword());
+    User user = userRepository.findByUsernameIgnoreCase(loginDTO.username()).orElseThrow(() -> new UnauthorizedException("user not found"));
+    boolean passwordMatch = passwordEncoder.matches(loginDTO.password(), user.getPassword());
     if(passwordMatch) {
       String accessToken = jwtService.generateToken(user.getUsername(), List.of( user.getRole() ));
       return new AuthDTO.LoginResponse(accessToken, this.mapToUserDTO(user));

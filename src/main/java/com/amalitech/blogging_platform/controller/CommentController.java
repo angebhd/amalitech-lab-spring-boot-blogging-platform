@@ -3,12 +3,10 @@ package com.amalitech.blogging_platform.controller;
 import com.amalitech.blogging_platform.dto.*;
 import com.amalitech.blogging_platform.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +25,9 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @RequestMapping("/api/v1/comment")
 @Tag(name = "Comments", description = "Manage commenents (Add, retrieve, update and delete)")
-@SecurityRequirement(name = "bearerAuth")
 public class CommentController {
 
   private final CommentService commentService;

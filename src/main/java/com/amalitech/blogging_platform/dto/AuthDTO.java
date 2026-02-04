@@ -1,30 +1,28 @@
 package com.amalitech.blogging_platform.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
 
 public class AuthDTO {
 
   private AuthDTO() {}
 
-  @Schema(name = "Login DTO", description = "Username and password")
-  @Getter
-  public static class  LoginDTO {
-    private String username;
-    private String password;
-  }
+  @Schema(name = "Login DTO", description = "Used for login with username and password, if the do not have a password, she can login with google email")
+  public record LoginDTO(
+          @Schema(name = "username", description = "User's username")
+          String username,
+          @Schema(name = "password", description = "User's password")
+          String password
+  ) {}
 
-  @Schema(name = "Login response", description = "Login response, contains the access token and the authenticated user")
-  @Getter
-  public static class  LoginResponse {
-    @Schema(name = "Access token", description = "Access that will be used to authenticate user")
-    private String token;
-    private UserDTO.Out user;
-
-    public  LoginResponse(String token, UserDTO.Out user) {
-      this.token = token;
-      this.user = user;
-    }
-  }
+  @Schema(
+          name = "Login response",
+          description = "Login response, contains the access token and the authenticated user"
+  )
+  public record LoginResponse(
+          @Schema(name = "Access token", description = "Access token that will be used to authenticate user" )
+          String token,
+          @Schema(name = "User", description = "Authenticated user information" )
+          UserDTO.Out user
+  ) {}
 }
 

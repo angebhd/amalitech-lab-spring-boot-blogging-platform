@@ -33,10 +33,6 @@ public class UserDTO {
     @Email
     private String email;
 
-    @Schema(description = "User's role", example = "USER", enumAsRef = true)
-    private UserRole role = UserRole.USER;
-
-
     @Schema(description = "User's password", example = "MyD!fficultP@ssw0rd")
     @NotBlank(message = "Password should not be empty")
     @Size(min = 4, max = 20, message = "Password should be between 4 and 20 characters")

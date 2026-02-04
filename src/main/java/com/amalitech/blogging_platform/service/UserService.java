@@ -2,8 +2,10 @@ package com.amalitech.blogging_platform.service;
 
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
+import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
+import com.amalitech.blogging_platform.model.UserRole;
 import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.ReviewRepository;
@@ -35,9 +37,15 @@ public class UserService {
     this.reviewRepository = reviewRepository;
   }
 
+  public UserDTO.Out create(UserDTO.In user) {
+    return this.create(user, false);
+  }
 
-  public UserDTO.Out create(UserDTO.In user){
-    User createdUser = this.userRepository.save(this.mapToUser(user));
+  public UserDTO.Out create(UserDTO.In user, boolean isAdmin) {
+    verifyExistingUsername(user.getUsername());
+    verifyExistingEmail(user.getEmail());
+    UserRole role = isAdmin ? UserRole.ADMIN : UserRole.USER;
+    User createdUser = this.userRepository.save(this.mapToUser(user, role));
     return this.mapToUserDTO(createdUser);
   }
 
@@ -69,20 +77,22 @@ public class UserService {
           }
   )
   public UserDTO.Out update(Long id, UserDTO.In user){
-
     User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     user.setPassword(oldUser.getPassword());
 
-    if (user.getEmail() != null)
+    if (user.getEmail() != null && !user.getEmail().equals(oldUser.getEmail())) {
+      verifyExistingEmail(user.getEmail());
       oldUser.setEmail(user.getEmail());
-    if (user.getUsername() != null)
+      }
+    if (user.getUsername() != null && !user.getUsername().equals(oldUser.getUsername())) {
+      verifyExistingUsername(user.getUsername());
       oldUser.setUsername(user.getUsername());
+    }
+
     if (user.getFirstName() != null)
       oldUser.setFirstName(user.getFirstName());
     if (user.getLastName() != null)
       oldUser.setLastName(user.getLastName());
-    if (user.getRole() != null )
-      oldUser.setRole(user.getRole());
 
     return this.mapToUserDTO(this.userRepository.save(oldUser));
   }
@@ -103,7 +113,19 @@ public class UserService {
     this.userRepository.deleteById(id);
   }
 
-  private User mapToUser(UserDTO.In in){
+  private void verifyExistingUsername(String username){
+    boolean existByUsername = userRepository.existsByUsernameIgnoreCase(username);
+    if(existByUsername)
+      throw new DataConflictException("Username already exist");
+  }
+
+  private void verifyExistingEmail(String email){
+    boolean existByEmail = this.userRepository.existsByEmailIgnoreCase(email);
+    if(existByEmail)
+      throw new DataConflictException("Email already exist");
+  }
+
+  private User mapToUser(UserDTO.In in, UserRole role){
     User user = new User();
     String hashedPassword = this.passwordEncoder.encode(in.getPassword());
     user.setFirstName(in.getFirstName());
@@ -111,6 +133,7 @@ public class UserService {
     user.setUsername(in.getUsername());
     user.setEmail(in.getEmail());
     user.setPassword(hashedPassword);
+    user.setRole(role);
     return user;
   }
 

@@ -17,7 +17,7 @@ import java.util.Map;
 public class CustomExceptionHandler {
 
   @ExceptionHandler(RessourceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleNotFoundExceotion(RessourceNotFoundException ex, WebRequest request) {
+  public ResponseEntity<ErrorResponse> handleNotFoundException(RessourceNotFoundException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
     log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
