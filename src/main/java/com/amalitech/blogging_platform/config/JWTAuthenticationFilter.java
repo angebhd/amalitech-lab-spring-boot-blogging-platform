@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -17,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
@@ -34,10 +36,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
     SecurityContext context = SecurityContextHolder.getContext();
     String token = request.getHeader("Authorization");
-    if(token == null || context.getAuthentication() == null) {
+    if(token == null || context.getAuthentication() != null) {
+      log.debug("No token found");
       filterChain.doFilter(request, response);
       return;
     }
+
     if (token.startsWith("Bearer ")) {
       String jwtToken = token.substring(7);
       String username = jwtService.extractUsername(jwtToken);

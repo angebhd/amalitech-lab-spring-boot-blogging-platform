@@ -21,12 +21,33 @@ spring:
         default-page-size: 10
         max-page-size: 100
         one-indexed-parameters: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
 
 springdoc:
   api-docs:
     enabled: true
   swagger-ui:
     enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.amalitech.blogging_platform.config: DEBUG
+
+
 
 jwt:
   secret: ${JWT_SECRET}
