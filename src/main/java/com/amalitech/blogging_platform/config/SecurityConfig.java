@@ -25,7 +25,6 @@ public class SecurityConfig {
 
   private final CustomUserDetailsService customUserDetailsService;
   private final JWTAuthenticationFilter jwtAuthenticationFilter;
-
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) {
     return http
@@ -38,12 +37,15 @@ public class SecurityConfig {
                             .requestMatchers("/api/v1/post/feed").permitAll()
                             .anyRequest().authenticated()
             )
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .oauth2Login(oauth -> oauth
+                    .defaultSuccessUrl("/api/v1/auth/login/oauth2/success", true)
+                    .authorizationEndpoint( url -> url.baseUri("/api/v1/auth/oauth2/"))
+            )
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .authenticationProvider(authenticationProvider())
             .build();
   }
-
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -61,5 +63,6 @@ public class SecurityConfig {
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
     return configuration.getAuthenticationManager();
   }
+
 
 }

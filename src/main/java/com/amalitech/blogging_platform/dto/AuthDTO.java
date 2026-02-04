@@ -1,10 +1,11 @@
-package com.amalitech.blogging_platform.service;
+package com.amalitech.blogging_platform.dto;
 
-import com.amalitech.blogging_platform.dto.UserDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 public class AuthDTO {
+
+  private AuthDTO() {}
 
   @Schema(name = "Login DTO", description = "Username and password")
   @Getter
@@ -24,7 +25,6 @@ public class AuthDTO {
       this.token = token;
       this.user = user;
     }
-
   }
 }
 

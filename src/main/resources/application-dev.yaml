@@ -47,7 +47,5 @@ logging:
     org.springframework.security: DEBUG
     com.amalitech.blogging_platform.config: DEBUG
 
-
-
 jwt:
   secret: ${JWT_SECRET}
