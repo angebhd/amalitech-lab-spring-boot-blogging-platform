@@ -1,4 +1,4 @@
-package com.amalitech.blogging_platform.config;
+package com.amalitech.blogging_platform.security;
 
 import lombok.Getter;
 import lombok.Setter;

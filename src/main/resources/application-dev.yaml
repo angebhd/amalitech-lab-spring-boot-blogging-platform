@@ -47,11 +47,14 @@ logging:
     org.springframework.security: DEBUG
     com.amalitech.blogging_platform.config: DEBUG
 
-jwt:
-  secret: ${JWT_SECRET}
+
 
 app:
+  jwt:
+    secret-key: ${JWT_SECRET}
+    expire-after: 3600000 # 1 hour in ms
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
     allowed-headers: ${CORS_ALLOWED_HEADERS}
+    allowed-methods: ${CORS_ALLOWED_METHODS}
     allow-credentials: ${CORS_ALLOW_CREDENTIALS}

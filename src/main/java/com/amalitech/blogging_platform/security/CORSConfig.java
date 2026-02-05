@@ -1,4 +1,4 @@
-package com.amalitech.blogging_platform.config;
+package com.amalitech.blogging_platform.security;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +19,9 @@ public class CORSConfig {
     config.setAllowedHeaders(props.getAllowedHeaders());
     config.setAllowCredentials(props.isAllowCredentials());
 
-    // Cache preflight responses
     config.setMaxAge(3600L);
 
-    UrlBasedCorsConfigurationSource source =
-            new UrlBasedCorsConfigurationSource();
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);
     return source;
   }
