@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/user")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Users", description = "Manage users (Add, retrieve, update and delete)")
 public class UserController {
 
@@ -38,10 +41,11 @@ public class UserController {
   @GetMapping()
   @Operation(summary = "Get a users in a paginated format")
   @ApiResponse(responseCode= "200", description = "Users retrieved")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<UserDTO.Out>>> getUsers(@ParameterObject Pageable pageable){
-
     var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(pageable));
     return ResponseEntity.ok(response);
   }
@@ -49,6 +53,8 @@ public class UserController {
   @GetMapping("{id}")
   @Operation(summary = "Get a specific user")
   @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -60,6 +66,8 @@ public class UserController {
   @GetMapping("/username/{username}")
   @Operation(summary = "Get a specific user by username")
   @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -70,11 +78,14 @@ public class UserController {
 
   @PostMapping()
   @Operation(summary = "Create a new user")
+  @PreAuthorize("hasRole('ADMIN')")
   @ApiResponse(responseCode= "201", description = "User created")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<UserDTO.Out>> create(@RequestBody @Valid UserDTO.In in){
-    UserDTO.Out user = this.userService.create(in);
+  public ResponseEntity<GenericResponse<UserDTO.Out>> create(@RequestBody @Valid UserDTO.In in, @RequestParam(required = false, defaultValue = "false") Boolean isAdmin){
+    UserDTO.Out user = this.userService.create(in, isAdmin);
     var response = new GenericResponse<>(HttpStatus.CREATED, user);
     return ResponseEntity.status(HttpStatusCode.valueOf(response.getStatusCode())).body(response);
   }
@@ -83,6 +94,8 @@ public class UserController {
   @PutMapping("{id}")
   @Operation(summary = "Update  a user")
   @ApiResponse(responseCode= "200", description = "User updated")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<UserDTO.Out>> update(@PathVariable Long id, @RequestBody @Valid UserDTO.In in){
@@ -93,9 +106,10 @@ public class UserController {
   @DeleteMapping("{id}")
   @Operation(summary = "Delete  a user")
   @ApiResponse(responseCode= "200", description = "User deleted")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-
   public ResponseEntity<GenericResponse<UserDTO.Out>> delete(@PathVariable Long id){
     this.userService.delete(id);
     GenericResponse<UserDTO.Out> resp = new GenericResponse<>(HttpStatus.OK, "User deleted", null);

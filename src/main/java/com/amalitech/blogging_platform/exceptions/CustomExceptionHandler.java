@@ -2,6 +2,7 @@ package com.amalitech.blogging_platform.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class CustomExceptionHandler {
 
   @ExceptionHandler(RessourceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleNotFoundExceotion(RessourceNotFoundException ex, WebRequest request) {
+  public ResponseEntity<ErrorResponse> handleNotFoundException(RessourceNotFoundException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
     log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -48,11 +49,23 @@ public class CustomExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(PropertyReferenceException.class)
+  public ResponseEntity<ErrorResponse> handlePropertyReferenceException(PropertyReferenceException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(InvalidDataAccessApiUsageException.class)
   public ResponseEntity<ErrorResponse> handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex, WebRequest request) {
     ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
     log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-
  }
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorizedtException(UnauthorizedException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
 }

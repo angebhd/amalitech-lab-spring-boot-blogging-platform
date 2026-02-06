@@ -33,10 +33,6 @@ public class UserDTO {
     @Email
     private String email;
 
-    @Schema(description = "User's role", example = "USER", enumAsRef = true)
-    private UserRole role = UserRole.USER;
-
-
     @Schema(description = "User's password", example = "MyD!fficultP@ssw0rd")
     @NotBlank(message = "Password should not be empty")
     @Size(min = 4, max = 20, message = "Password should be between 4 and 20 characters")
@@ -52,6 +48,7 @@ public class UserDTO {
     private String lastName;
     private String username;
     private String email;
+    private UserRole role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
@@ -66,6 +63,7 @@ public class UserDTO {
       out.setLastName(user.getLastName());
       out.setUsername(user.getUsername());
       out.setEmail(user.getEmail());
+      out.setRole(user.getRole());
       out.setCreatedAt(user.getCreatedAt());
       out.setDeletedAt(user.getDeletedAt());
       out.setUpdatedAt(user.getUpdatedAt());

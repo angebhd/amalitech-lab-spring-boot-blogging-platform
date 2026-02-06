@@ -62,6 +62,7 @@ public class PostDTO {
     private Long reviews;
     private Float reviewAverage;
     private Long comments;
+    private boolean isDeleted;
   }
 
 

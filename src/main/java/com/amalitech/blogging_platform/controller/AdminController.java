@@ -1,95 +1,94 @@
 package com.amalitech.blogging_platform.controller;
 
+import com.amalitech.blogging_platform.dto.AuthDTO;
+import com.amalitech.blogging_platform.dto.BlacklistedTokenInfo;
 import com.amalitech.blogging_platform.dto.GenericResponse;
-import com.amalitech.blogging_platform.dto.PaginatedData;
-import com.amalitech.blogging_platform.dto.TagDTO;
-import com.amalitech.blogging_platform.service.TagService;
+import com.amalitech.blogging_platform.dto.UserDTO;
+import com.amalitech.blogging_platform.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Rest Controller for managing Tags
- */
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/tag")
+@RequestMapping("/api/v1/admin")
+@PreAuthorize("hasRole('ADMIN')")
 @SecurityRequirement(name = "bearerAuth")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "Manage tags (Add, retrieve, update and delete)")
-public class TagController {
-  private final TagService tagService;
-
-  @Autowired
-  public TagController(TagService tagService) {
-    this.tagService = tagService;
+@Tag(name = "Admin endpoints", description = "Admin endpoints")
+public class AdminController {
+  private  final AdminService adminService;
+  public AdminController(AdminService adminService) {
+    this.adminService = adminService;
   }
-  @GetMapping()
-  @Operation(summary = "Get a tags in a paginated format")
-  @ApiResponse(responseCode= "200", description = "Tags retrieved")
+
+  @PostMapping("view-token-payload")
+  @Operation(summary = "Get token claims")
+  @ApiResponse(responseCode= "200", description = "Login successful")
   @ApiResponse(responseCode= "400", description = "Bad Request")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<PaginatedData<TagDTO.Out>>> getTags(@ParameterObject Pageable pageable){
-    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(pageable));
+  public ResponseEntity<GenericResponse<AuthDTO.TokenPayload>> login(@RequestBody String token){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.getTokenPayload(token));
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("{id}")
-  @Operation(summary = "Get a tag by ID")
-  @ApiResponse(responseCode= "200", description = "Tag retrieved")
-  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @PostMapping("make-admin")
+  @Operation(summary = "User is no longer an admin")
+  @ApiResponse(responseCode= "200", description = "User is now an admin")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
-  @ApiResponse(responseCode= "404", description = "Tag not found", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<TagDTO.Out>> getTag(@PathVariable Long id){
-    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(id));
+  public ResponseEntity<GenericResponse<UserDTO.Out>> makeAdmin(@RequestBody Long id){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.makeAdmin(id));
     return ResponseEntity.ok(response);
   }
 
-  @PostMapping()
-  @Operation(summary = "Create tags")
-  @ApiResponse(responseCode= "201", description = "Tags created")
+  @PostMapping("remove-admin")
+  @Operation(summary = "Remove admin rights to a user")
+  @ApiResponse(responseCode= "200", description = "User is no longer an admin")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
-  @ApiResponse(responseCode= "409", description = "Conflict", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<TagDTO.Out>> create(@RequestBody String tags){
-    var response = new GenericResponse<>(HttpStatus.CREATED,  this.tagService.create(tags));
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+  public ResponseEntity<GenericResponse<UserDTO.Out>> removeAdmin(@RequestBody Long id){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.removeAdmin(id));
+    return ResponseEntity.ok(response);
   }
 
-  @PutMapping("{id}")
-  @Operation(summary = "Update tags")
-  @ApiResponse(responseCode= "200", description = "Tags updateg")
+  @PostMapping("blacklist-token")
+  @Operation(summary = "Blacklist a token")
+  @ApiResponse(responseCode= "200", description = "Token blacklisted")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
-  @ApiResponse(responseCode= "409", description = "Conflict", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<TagDTO.Out>> update(@PathVariable Long id, @RequestBody String tag){
-    var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.update(id, tag ));
-    return ResponseEntity.status(HttpStatus.OK).body(response);
+  public ResponseEntity<GenericResponse<Void>> blacklistToken(@RequestBody String token){
+    this.adminService.blacklistToken(token);
+    var response = new GenericResponse<Void>(HttpStatus.OK, null);
+    return ResponseEntity.ok(response);
   }
 
-  @DeleteMapping("{id}")
-  @Operation(summary = "Delete tags")
-  @ApiResponse(responseCode= "20o", description = "Tags deleted")
+  @GetMapping("blacklist-token")
+  @Operation(summary = "Get list of blacklisted token with some info")
+  @ApiResponse(responseCode= "200", description = "Blacklisted Tokens retrieved")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<String>> delete(@PathVariable Long id){
-    this.tagService.delete(id);
-    var response = new GenericResponse<String>(HttpStatus.OK, "Tag sucessfully deleted",null);
-    return ResponseEntity.status(HttpStatus.OK).body(response);
+  public ResponseEntity<GenericResponse<List<BlacklistedTokenInfo>>> blacklistToken(){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.getBlacklistedTokens());
+    return ResponseEntity.ok(response);
   }
-
 
 }

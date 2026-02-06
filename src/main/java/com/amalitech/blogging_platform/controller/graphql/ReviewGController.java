@@ -20,7 +20,7 @@ public class ReviewGController {
 
   }
   @QueryMapping
-  public PaginatedData<ReviewDTO.Out> reviews(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+  public PaginatedData<ReviewDTO.Out> reviews(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
     return this.reviewService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
 

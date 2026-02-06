@@ -1,6 +1,9 @@
 type Query{}
 
-type Mutation{}
+type Mutation{
+    login(username: String!, password: String!): LoginResponse
+
+}
 
 interface Paginated{
     page: Int
@@ -25,4 +28,9 @@ input SortInput {
 enum SortDirection {
     ASC
     DESC
+}
+
+type LoginResponse{
+    token: String
+    user: User
 }

@@ -2,8 +2,10 @@ package com.amalitech.blogging_platform.service;
 
 import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
+import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
 import com.amalitech.blogging_platform.model.User;
+import com.amalitech.blogging_platform.model.UserRole;
 import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
 import com.amalitech.blogging_platform.repository.ReviewRepository;
@@ -13,30 +15,37 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
-  private final PasswordHashService passwordHashService;
+  private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final ReviewRepository reviewRepository;
   private static final String USERNOTFOUNDMESSAGE = "User not found";
 
-  public UserService(UserRepository userRepository, PasswordHashService passwordHashService, PostRepository postRepository,
+  public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PostRepository postRepository,
                      CommentRepository commentRepository, ReviewRepository reviewRepository) {
     this.userRepository = userRepository;
-    this.passwordHashService = passwordHashService;
+    this.passwordEncoder = passwordEncoder;
     this.postRepository = postRepository;
     this.commentRepository = commentRepository;
     this.reviewRepository = reviewRepository;
   }
 
+  public UserDTO.Out create(UserDTO.In user) {
+    return this.create(user, false);
+  }
 
-  public UserDTO.Out create(UserDTO.In user){
-    User createdUser = this.userRepository.save(this.mapToUser(user));
+  public UserDTO.Out create(UserDTO.In user, boolean isAdmin) {
+    verifyExistingUsername(user.getUsername());
+    verifyExistingEmail(user.getEmail());
+    UserRole role = isAdmin ? UserRole.ADMIN : UserRole.USER;
+    User createdUser = this.userRepository.save(this.mapToUser(user, role));
     return this.mapToUserDTO(createdUser);
   }
 
@@ -68,22 +77,36 @@ public class UserService {
           }
   )
   public UserDTO.Out update(Long id, UserDTO.In user){
-
     User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
     user.setPassword(oldUser.getPassword());
 
-    if (user.getEmail() != null)
+    if (user.getEmail() != null && !user.getEmail().equals(oldUser.getEmail())) {
+      verifyExistingEmail(user.getEmail());
       oldUser.setEmail(user.getEmail());
-    if (user.getUsername() != null)
+      }
+    if (user.getUsername() != null && !user.getUsername().equals(oldUser.getUsername())) {
+      verifyExistingUsername(user.getUsername());
       oldUser.setUsername(user.getUsername());
+    }
+
     if (user.getFirstName() != null)
       oldUser.setFirstName(user.getFirstName());
     if (user.getLastName() != null)
       oldUser.setLastName(user.getLastName());
-    if (user.getRole() != null )
-      oldUser.setRole(user.getRole());
 
     return this.mapToUserDTO(this.userRepository.save(oldUser));
+  }
+
+  public UserDTO.Out makeAdmin(long id){
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    user.setRole(UserRole.ADMIN);
+    return this.mapToUserDTO(this.userRepository.save(user));
+  }
+
+  public UserDTO.Out removeAdmin(long id){
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    user.setRole(UserRole.USER);
+    return this.mapToUserDTO(this.userRepository.save(user));
   }
 
 
@@ -102,14 +125,27 @@ public class UserService {
     this.userRepository.deleteById(id);
   }
 
-  private User mapToUser(UserDTO.In in){
+  private void verifyExistingUsername(String username){
+    boolean existByUsername = userRepository.existsByUsernameIgnoreCase(username);
+    if(existByUsername)
+      throw new DataConflictException("Username already exist");
+  }
+
+  private void verifyExistingEmail(String email){
+    boolean existByEmail = this.userRepository.existsByEmailIgnoreCase(email);
+    if(existByEmail)
+      throw new DataConflictException("Email already exist");
+  }
+
+  private User mapToUser(UserDTO.In in, UserRole role){
     User user = new User();
-    String hashedPassword = this.passwordHashService.hash(in.getPassword().toCharArray());
+    String hashedPassword = this.passwordEncoder.encode(in.getPassword());
     user.setFirstName(in.getFirstName());
     user.setLastName(in.getLastName());
     user.setUsername(in.getUsername());
     user.setEmail(in.getEmail());
     user.setPassword(hashedPassword);
+    user.setRole(role);
     return user;
   }
 

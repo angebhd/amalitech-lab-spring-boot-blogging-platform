@@ -24,7 +24,7 @@ public class PostGController {
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.Out> posts(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+  public PaginatedData<PostDTO.Out> posts(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
     return this.postService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
   @QueryMapping
@@ -33,12 +33,12 @@ public class PostGController {
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.Out> postByAuthorId(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument Long id) {
+  public PaginatedData<PostDTO.Out> postByAuthorId(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument Long id) {
     return this.postService.getByAuthorId(id, GraphQLPageableBuilder.get(page, size, sortBy));
   }
 
   @QueryMapping
-  public PaginatedData<PostDTO.OutWithStats> postSearch(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument String keyword) {
+  public PaginatedData<PostDTO.OutWithStats> postSearch(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy, @Argument String keyword) {
     return this.postService.search(keyword, GraphQLPageableBuilder.get(page, size, sortBy));
   }
 
