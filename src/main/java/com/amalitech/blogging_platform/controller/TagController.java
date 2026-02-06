@@ -33,7 +33,9 @@ public class TagController {
   @GetMapping()
   @Operation(summary = "Get a tags in a paginated format")
   @ApiResponse(responseCode= "200", description = "Tags retrieved")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<TagDTO.Out>>> getTags(@ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.get(pageable));
@@ -43,6 +45,9 @@ public class TagController {
   @GetMapping("{id}")
   @Operation(summary = "Get a tag by ID")
   @ApiResponse(responseCode= "200", description = "Tag retrieved")
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "Tag not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<TagDTO.Out>> getTag(@PathVariable Long id){
@@ -53,7 +58,9 @@ public class TagController {
   @PostMapping()
   @Operation(summary = "Create tags")
   @ApiResponse(responseCode= "201", description = "Tags created")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Conflict", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<TagDTO.Out>> create(@RequestBody String tags){
     var response = new GenericResponse<>(HttpStatus.CREATED,  this.tagService.create(tags));
@@ -63,7 +70,9 @@ public class TagController {
   @PutMapping("{id}")
   @Operation(summary = "Update tags")
   @ApiResponse(responseCode= "200", description = "Tags updateg")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Conflict", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<TagDTO.Out>> update(@PathVariable Long id, @RequestBody String tag){
     var response = new GenericResponse<>(HttpStatus.OK,  this.tagService.update(id, tag ));
@@ -73,11 +82,12 @@ public class TagController {
   @DeleteMapping("{id}")
   @Operation(summary = "Delete tags")
   @ApiResponse(responseCode= "20o", description = "Tags deleted")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
-  public ResponseEntity<GenericResponse<Object>> delete(@PathVariable Long id){
+  public ResponseEntity<GenericResponse<String>> delete(@PathVariable Long id){
     this.tagService.delete(id);
-    var response = new GenericResponse<>(HttpStatus.OK, "Tag sucessfully deleted",null);
+    var response = new GenericResponse<String>(HttpStatus.OK, "Tag sucessfully deleted",null);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 

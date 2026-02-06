@@ -16,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -40,6 +38,7 @@ public class CommentController {
   @GetMapping()
   @Operation(summary = "Get a comments in a paginated format")
   @ApiResponse(responseCode= "200", description = "Comments retrieved")
+  @ApiResponse(responseCode= "400", description = "Bad Request")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -66,6 +65,7 @@ public class CommentController {
   @GetMapping("post/{id}")
   @Operation(summary = "Get a comments by post")
   @ApiResponse(responseCode= "200", description = "Post retrieved")
+  @ApiResponse(responseCode= "400", description = "Bad Request")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -79,6 +79,8 @@ public class CommentController {
   @GetMapping("user/{id}")
   @Operation(summary = "Get a comments by users")
   @ApiResponse(responseCode= "200", description = "Post retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "Post not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -90,6 +92,8 @@ public class CommentController {
   @PostMapping()
   @Operation(summary = "Create a new comment")
   @ApiResponse(responseCode= "201", description = "Comment created")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<CommentDTO.Out>> create(@RequestBody @Valid CommentDTO.In in){
@@ -99,6 +103,8 @@ public class CommentController {
   @PutMapping("{id}")
   @Operation(summary = "Update  a comment, you can only update the comment body, the remaining is handled by the application")
   @ApiResponse(responseCode= "200", description = "review updated")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<CommentDTO.Out>> update(@PathVariable Long id, @RequestBody String in){
@@ -109,24 +115,13 @@ public class CommentController {
   @DeleteMapping("{id}")
   @Operation(summary = "Delete  a comment")
   @ApiResponse(responseCode= "200", description = "Comment deleted")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<Object>> delete(@PathVariable Long id){
     this.commentService.delete(id);
     var resp = new GenericResponse<>(HttpStatus.OK, "Post deleted", null);
     return ResponseEntity.status(HttpStatusCode.valueOf(resp.getStatusCode())).body(resp);
-  }
-
-  @GetMapping("test")
-  @SecurityRequirement(name = "bearerAuth")
-  public String test(){
-    Authentication context = SecurityContextHolder.getContext().getAuthentication();
-    if (context == null) {
-      return null;
-    }
-
-    log.debug("Authorities: {}",context.getAuthorities().toString());
-    return context.getName();
-
   }
 }

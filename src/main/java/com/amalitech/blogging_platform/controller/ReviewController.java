@@ -38,6 +38,9 @@ public class ReviewController {
   @GetMapping()
   @Operation(summary = "Get a reviews in a paginated format")
   @ApiResponse(responseCode= "200", description = "Reviews retrieved")
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReview(@ParameterObject Pageable pageable){
@@ -48,7 +51,10 @@ public class ReviewController {
   @GetMapping("post/{id}")
   @Operation(summary = "Get a reviews in a paginated format")
   @ApiResponse(responseCode= "200", description = "Reviews retrieved")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReviewByPost(@PathVariable Long id, @ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.reviewService.getByPostId(id, pageable));
@@ -58,7 +64,9 @@ public class ReviewController {
   @GetMapping("user/{id}")
   @Operation(summary = "Get a reviews in a paginated format")
   @ApiResponse(responseCode= "200", description = "Reviews retrieved")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<ReviewDTO.Out>>> getReviewByUser(@PathVariable Long id, @ParameterObject Pageable pageable){
     var response = new GenericResponse<>(HttpStatus.OK,  this.reviewService.getByUserId(id, pageable));
@@ -68,6 +76,8 @@ public class ReviewController {
   @GetMapping("{id}")
   @Operation(summary = "Get a specific review")
   @ApiResponse(responseCode= "200", description = "review retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "review not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid path variable", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -79,6 +89,8 @@ public class ReviewController {
   @PostMapping()
   @Operation(summary = "Create a new review")
   @ApiResponse(responseCode= "201", description = "review created")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<ReviewDTO.Out>> create(@RequestBody @Valid ReviewDTO.In in){
@@ -90,6 +102,8 @@ public class ReviewController {
   @PutMapping("{id}")
   @Operation(summary = "Update  a review")
   @ApiResponse(responseCode= "200", description = "review updated")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<ReviewDTO.Out>> update(@PathVariable Long id, @RequestBody EReview in){
@@ -100,6 +114,8 @@ public class ReviewController {
   @DeleteMapping("{id}")
   @Operation(summary = "Delete  a review")
   @ApiResponse(responseCode= "200", description = "review deleted")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<Review>> delete(@PathVariable Long id){

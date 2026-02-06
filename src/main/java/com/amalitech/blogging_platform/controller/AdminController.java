@@ -1,6 +1,7 @@
 package com.amalitech.blogging_platform.controller;
 
 import com.amalitech.blogging_platform.dto.AuthDTO;
+import com.amalitech.blogging_platform.dto.BlacklistedTokenInfo;
 import com.amalitech.blogging_platform.dto.GenericResponse;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.service.AdminService;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -29,6 +32,7 @@ public class AdminController {
   @PostMapping("view-token-payload")
   @Operation(summary = "Get token claims")
   @ApiResponse(responseCode= "200", description = "Login successful")
+  @ApiResponse(responseCode= "400", description = "Bad Request")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -39,8 +43,8 @@ public class AdminController {
   }
 
   @PostMapping("make-admin")
-  @Operation(summary = "Get token claims")
-  @ApiResponse(responseCode= "200", description = "Login successful")
+  @Operation(summary = "User is no longer an admin")
+  @ApiResponse(responseCode= "200", description = "User is now an admin")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -51,14 +55,39 @@ public class AdminController {
   }
 
   @PostMapping("remove-admin")
-  @Operation(summary = "Get token claims")
-  @ApiResponse(responseCode= "200", description = "Login successful")
+  @Operation(summary = "Remove admin rights to a user")
+  @ApiResponse(responseCode= "200", description = "User is no longer an admin")
   @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<UserDTO.Out>> removeAdmin(@RequestBody Long id){
     var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.removeAdmin(id));
+    return ResponseEntity.ok(response);
+  }
+
+  @PostMapping("blacklist-token")
+  @Operation(summary = "Blacklist a token")
+  @ApiResponse(responseCode= "200", description = "Token blacklisted")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<Void>> blacklistToken(@RequestBody String token){
+    this.adminService.blacklistToken(token);
+    var response = new GenericResponse<Void>(HttpStatus.OK, null);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("blacklist-token")
+  @Operation(summary = "Get list of blacklisted token with some info")
+  @ApiResponse(responseCode= "200", description = "Blacklisted Tokens retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid request", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<List<BlacklistedTokenInfo>>> blacklistToken(){
+    var response = new GenericResponse<>(HttpStatus.OK,  this.adminService.getBlacklistedTokens());
     return ResponseEntity.ok(response);
   }
 

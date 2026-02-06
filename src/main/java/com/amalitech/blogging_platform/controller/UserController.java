@@ -41,10 +41,11 @@ public class UserController {
   @GetMapping()
   @Operation(summary = "Get a users in a paginated format")
   @ApiResponse(responseCode= "200", description = "Users retrieved")
-  @ApiResponse(responseCode= "409", description = "Invalid params should be integer greater than 0", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "400", description = "Bad Request")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<PaginatedData<UserDTO.Out>>> getUsers(@ParameterObject Pageable pageable){
-
     var response = new GenericResponse<>(HttpStatus.OK,  this.userService.get(pageable));
     return ResponseEntity.ok(response);
   }
@@ -52,6 +53,8 @@ public class UserController {
   @GetMapping("{id}")
   @Operation(summary = "Get a specific user")
   @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -63,6 +66,8 @@ public class UserController {
   @GetMapping("/username/{username}")
   @Operation(summary = "Get a specific user by username")
   @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
@@ -75,6 +80,8 @@ public class UserController {
   @Operation(summary = "Create a new user")
   @PreAuthorize("hasRole('ADMIN')")
   @ApiResponse(responseCode= "201", description = "User created")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<UserDTO.Out>> create(@RequestBody @Valid UserDTO.In in, @RequestParam(required = false, defaultValue = "false") Boolean isAdmin){
@@ -87,6 +94,8 @@ public class UserController {
   @PutMapping("{id}")
   @Operation(summary = "Update  a user")
   @ApiResponse(responseCode= "200", description = "User updated")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<UserDTO.Out>> update(@PathVariable Long id, @RequestBody @Valid UserDTO.In in){
@@ -97,6 +106,8 @@ public class UserController {
   @DeleteMapping("{id}")
   @Operation(summary = "Delete  a user")
   @ApiResponse(responseCode= "200", description = "User deleted")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
   @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
   public ResponseEntity<GenericResponse<UserDTO.Out>> delete(@PathVariable Long id){

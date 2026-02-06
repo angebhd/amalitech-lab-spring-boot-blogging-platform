@@ -2,6 +2,7 @@ package com.amalitech.blogging_platform.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +45,13 @@ public class CustomExceptionHandler {
     Map<String, String> errors = new HashMap<>();
     ex.getBindingResult().getFieldErrors().forEach(fieldError -> errors.put(fieldError.getField(), fieldError.getDefaultMessage()));
     response.setDescription(errors);
+    log.error(ex.getMessage(), request.getContextPath());
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(PropertyReferenceException.class)
+  public ResponseEntity<ErrorResponse> handlePropertyReferenceException(PropertyReferenceException ex, WebRequest request) {
+    ErrorResponse response = new ErrorResponse(ex.getMessage(), request.getContextPath());
     log.error(ex.getMessage(), request.getContextPath());
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }

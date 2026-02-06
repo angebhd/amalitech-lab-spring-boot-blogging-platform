@@ -6,6 +6,8 @@ import com.amalitech.blogging_platform.exceptions.UnauthorizedException;
 import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.model.UserRole;
 import com.amalitech.blogging_platform.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,6 +23,7 @@ public class AuthService {
   private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final JWTService jwtService;
+  private final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
 
   @Autowired
@@ -39,10 +42,11 @@ public class AuthService {
     User user = userRepository.findByUsernameIgnoreCase(loginDTO.username()).orElseThrow(() -> new UnauthorizedException("user not found"));
     boolean passwordMatch = passwordEncoder.matches(loginDTO.password(), user.getPassword());
     if(passwordMatch) {
+      this.logger.info("{} logged in successfully", user.getUsername());
       String accessToken = jwtService.generateToken(user.getUsername(), List.of( user.getRole() ));
       return new AuthDTO.LoginResponse(accessToken, this.mapToUserDTO(user));
     }
-
+    this.logger.warn("{} login failed", user.getUsername());
     throw new UnauthorizedException("username or password incorrect");
   }
 

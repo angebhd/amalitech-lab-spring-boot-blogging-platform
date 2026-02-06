@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
@@ -24,11 +25,17 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
   private final JWTService jwtService;
   private final UserDetailsService userDetailsService;
+  private final TokenBlacklist blacklist;
+  private final HandlerExceptionResolver handlerExceptionResolver;
 
   @Autowired
-  public JWTAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService) {
+  public JWTAuthenticationFilter(JWTService jwtService, UserDetailsService userDetailsService, TokenBlacklist blacklist,
+                                 HandlerExceptionResolver handlerExceptionResolver
+  ) {
     this.jwtService = jwtService;
     this.userDetailsService = userDetailsService;
+    this.blacklist = blacklist;
+    this.handlerExceptionResolver = handlerExceptionResolver;
   }
 
 
@@ -45,6 +52,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     String jwtToken = authHeader.substring(7);
 
     try {
+      if (blacklist.isBlacklisted(jwtToken)) {
+        throw new  UnauthorizedException("Token blacklisted");
+      }
+
       String username = jwtService.extractUsername(jwtToken);
 
       if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -60,12 +71,14 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
       }
     } catch (UnauthorizedException e) {
       SecurityContextHolder.clearContext();
-      throw e;
+      log.debug("Thrown error: {}",e.getMessage());
+      handlerExceptionResolver.resolveException(request, response, null, e);
+      return;
     } catch (Exception e) {
       SecurityContextHolder.clearContext();
-      throw new UnauthorizedException("Invalid authentication token");
+      handlerExceptionResolver.resolveException(request, response, null, new UnauthorizedException("Invalid authentication token"));
+      return;
     }
-
     filterChain.doFilter(request, response);
   }
 }
