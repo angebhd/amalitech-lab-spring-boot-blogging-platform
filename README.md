@@ -59,8 +59,9 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
   - **Argon2 Hashing**: Modern, memory-hard password hashing for maximum security.
   - **RBAC (Role-Based Access Control)**: Granular permissions using **ADMIN** and **USER** roles.
 - **Web Security Policies**:
-  - **CORS (Cross-Origin Resource Sharing)**: Secure communication for React and JavaFX clients. [Read more](docs/security/cors-csrf.md).
-  - **CSRF Protection**: Strategically implemented for stateful sessions and disabled for stateless APIs.
+  - **CORS (Cross-Origin Resource Sharing)**: Secure communication for React and JavaFX clients. Prevents unauthorized data reading across origins.
+  - **CSRF Protection**: Strategically implemented for stateful sessions and disabled for stateless APIs. Prevents unauthorized action execution by malicious sites.
+  - **CORS vs. CSRF**: While both address cross-origin security, CORS controls **who** can read data, whereas CSRF prevents **how** actions are triggered. In our stateless JWT model, the `Authorization` header provides inherent CSRF immunity as it cannot be automatically attached by browsers. [Technical Deep-dive](docs/security/cors-csrf.md).
 - **Persistence & Performance**:
   - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence/persistence-details.md).
   - **Flyway Migrations**: Version-controlled database schema management.
