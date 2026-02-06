@@ -2,6 +2,10 @@ package com.amalitech.blogging_platform.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 public class AuthDTO {
 
   private AuthDTO() {}
@@ -24,5 +28,20 @@ public class AuthDTO {
           @Schema(name = "User", description = "Authenticated user information" )
           UserDTO.Out user
   ) {}
+
+  public record TokenPayload(
+          @Schema(name = "Access token", description = "Access token that will be used to authenticate user" )
+          String username,
+          @Schema(name = "Roles", description = "User roles" )
+          List<String> roles,
+//          @Schema(name = "Issued at")
+//          Date issuedAt,
+          @Schema(name = "Expired at", description = "Expiration date" )
+          Date espiredAt,
+          @Schema(name = "JIT", description = "Token ID" )
+          UUID jit
+  ) {}
+
+
 }
 

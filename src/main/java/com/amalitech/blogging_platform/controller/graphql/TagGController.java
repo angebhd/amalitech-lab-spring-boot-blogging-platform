@@ -22,7 +22,7 @@ public class TagGController {
   }
 
   @QueryMapping
-  public PaginatedData<TagDTO.Out> tags(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy){
+  public PaginatedData<TagDTO.Out> tags(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy){
     return this.tagService.get(GraphQLPageableBuilder.get(page, size, sortBy));
 
   }

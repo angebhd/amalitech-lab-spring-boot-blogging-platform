@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class JWTService {
@@ -34,6 +35,7 @@ public class JWTService {
 
     return Jwts.builder()
             .subject(username)
+            .id(UUID.randomUUID().toString())
             .claim("roles", roles)
             .issuedAt(new Date(now))
             .expiration(new Date(now + jwtProperties.getExpireAfter()))
@@ -41,7 +43,7 @@ public class JWTService {
             .compact();
   }
 
-  public Claims extractClaims(String token) {
+  private Claims extractClaims(String token) {
     return Jwts.parser()
             .verifyWith(signingKey)
             .build()
@@ -55,6 +57,10 @@ public class JWTService {
 
   public List<String> extractRoles(String token) {
     return extractClaims(token).get("roles", List.class);
+  }
+
+  public UUID extractJIT(String token) {
+    return UUID.fromString(extractClaims(token).get("id", String.class));
   }
 
   public Date extractExpiration(String token) {

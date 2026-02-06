@@ -48,6 +48,7 @@ public class UserDTO {
     private String lastName;
     private String username;
     private String email;
+    private UserRole role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
@@ -62,6 +63,7 @@ public class UserDTO {
       out.setLastName(user.getLastName());
       out.setUsername(user.getUsername());
       out.setEmail(user.getEmail());
+      out.setRole(user.getRole());
       out.setCreatedAt(user.getCreatedAt());
       out.setDeletedAt(user.getDeletedAt());
       out.setUpdatedAt(user.getUpdatedAt());

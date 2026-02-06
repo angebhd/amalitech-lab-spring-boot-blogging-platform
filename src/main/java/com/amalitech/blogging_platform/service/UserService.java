@@ -97,6 +97,18 @@ public class UserService {
     return this.mapToUserDTO(this.userRepository.save(oldUser));
   }
 
+  public UserDTO.Out makeAdmin(long id){
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    user.setRole(UserRole.ADMIN);
+    return this.mapToUserDTO(this.userRepository.save(user));
+  }
+
+  public UserDTO.Out removeAdmin(long id){
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    user.setRole(UserRole.USER);
+    return this.mapToUserDTO(this.userRepository.save(user));
+  }
+
 
   @Transactional
   @Caching(

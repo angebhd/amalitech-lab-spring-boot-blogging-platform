@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class UserGController {
     this.userService = userService;
   }
   @QueryMapping
-  public PaginatedData<UserDTO.Out> users(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+  public PaginatedData<UserDTO.Out> users(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
     return this.userService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
   @QueryMapping
@@ -36,6 +37,7 @@ public class UserGController {
   }
 
   @MutationMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public UserDTO.Out createUser(@Argument UserDTO.In input) {
     return this.userService.create(input);
   }
