@@ -9,10 +9,11 @@ A web-based blogging platform built with **Spring Boot** and **PostgreSQL**. The
 The platform follows a layered architecture to ensure separation of concerns and maintainability:
 
 - **Presentation Layer**: Exposes data via **REST controllers** and **GraphQL resolvers**.
+- **Security Layer**: Protects all endpoints using **Spring Security**, implementing **JWT-based authentication**, **Google OAuth2 login**, and **Role-Based Access Control (RBAC)**.
 - **Service Layer**: Implements core business logic, including **Argon2-based password hashing**, **Spring Cache** abstraction, and **Transaction Management**.
 - **Data Access Layer**: Handles persistence using **Spring Data JPA** with **PostgreSQL**, utilizing repository abstraction and custom JPQL/Native queries. **Flyway** manages schema migrations.
 - **Cross-Cutting Concerns**: Uses **Spring AOP** for logging, performance monitoring, and centralized error handling via `@ControllerAdvice`.
-- **Domain Model**: Defines core entities (User, Post, Comment, Tag, Review) with JPA annotations.
+- **Domain Model**: Defines core entities (User, Post, Comment, Tag, Review) and enums (**UserRole**) with JPA annotations.
 
 ---
 
@@ -52,22 +53,38 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 
 ## Features
 
-- **Hybrid API Support**:
-  - **RESTful Endpoints**: Standardized CRUD operations for all resources.
-  - **GraphQL Integration**: Flexible data fetching for complex requirements. [Read more](docs/graphql.md).
-- **Security**: 
-  - **Argon2 Hashing**: Industry-standard password hashing for user security.
+- **Secure Authentication**: 
+  - **JWT (JSON Web Token)**: Stateless authentication with HMAC SHA-256 signing. [Read more](docs/security/security-details.md).
+  - **Google OAuth2**: One-click login for simplified user onboarding.
+  - **Argon2 Hashing**: Modern, memory-hard password hashing for maximum security.
+  - **RBAC (Role-Based Access Control)**: Granular permissions using **ADMIN** and **USER** roles.
+- **Web Security Policies**:
+  - **CORS (Cross-Origin Resource Sharing)**: Secure communication for React and JavaFX clients. [Read more](docs/security/cors-csrf.md).
+  - **CSRF Protection**: Strategically implemented for stateful sessions and disabled for stateless APIs.
 - **Persistence & Performance**:
-  - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence.md).
+  - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence/persistence-details.md).
   - **Flyway Migrations**: Version-controlled database schema management.
-  - **Spring Cache**: Improving read performance for popular posts and users. [Read more](docs/caching.md).
+  - **Spring Cache**: Improving read performance for popular posts and users. [Read more](docs/persistence/caching.md).
   - **Transaction Management**: Ensuring data consistency with `@Transactional`.
   - **Database-Level Pagination**: Efficient data retrieval using `Pageable`.
 - **Quality & Monitoring**:
   - **Validation**: Strict input validation using Bean Validation.
-  - **AOP Monitoring**: Automated logging and performance tracking. [Read more](docs/aop.md).
-  - **Performance Benchmarking**: Detailed analysis of query and cache optimizations. [Read more](docs/performance-report.md).
+  - **AOP Monitoring**: Automated logging and performance tracking. [Read more](docs/monitoring/aop.md).
+  - **Performance Benchmarking**: Detailed analysis of query and cache optimizations. [Read more](docs/persistence/performance-report.md).
   - **OpenAPI Documentation**: Interactive API testing with Swagger UI.
+
+---
+
+## Detailed Documentation
+
+For a deeper dive into specific components, refer to the comprehensive documentation modules:
+
+- **[Security Architecture](docs/security/security-details.md)**: JWT flows, Google OAuth2, Argon2 hashing, and Token Blacklisting.
+- **[Web Policies](docs/security/cors-csrf.md)**: CORS preflight handshakes and CSRF immunity strategy.
+- **[Persistence Layer](docs/persistence/persistence-details.md)**: JPA repositories, Custom Native SQL, and Flyway.
+- **[Performance & Caching](docs/persistence/caching.md)**: Spring Cache strategy and **[Optimization Benchmarks](docs/persistence/performance-report.md)**.
+- **[API Specification](docs/api/graphql.md)**: GraphQL schema definitions and resolver logic.
+- **[Monitoring & AOP](docs/monitoring/aop.md)**: Automated logging and performance aspects.
 
 ---
 
@@ -75,15 +92,21 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 
 ```text
 .
-├── docs/                             # Documentation & SQL scripts
-│   ├── aop.md                       # AOP Implementation details
-│   ├── caching.md                   # Spring Cache strategy
-│   ├── database-design.md           # Conceptual, Logical, & Physical models
-│   ├── graphql.md                   # GraphQL Integration details
-│   ├── performance-report.md        # Benchmarking & Optimization analysis
-│   ├── persistence.md               # Spring Data JPA & Repository details
-│   ├── script.sql                   # Schema creation script
-│   └── feedDB.sql                   # Sample data script
+├── docs/                             # Project Documentation
+│   ├── security/                    # Authentication & Authorization docs
+│   │   ├── security-details.md      # JWT, OAuth2, & RBAC deep-dive
+│   │   └── cors-csrf.md             # Web security policy details
+│   ├── persistence/                 # Data Layer & Database docs
+│   │   ├── persistence-details.md   # Spring Data JPA & Custom Queries
+│   │   ├── caching.md               # Spring Cache strategy
+│   │   ├── performance-report.md    # Benchmarking & Optimization analysis
+│   │   ├── images/                  # Performance report assets
+│   │   └── sql/                     # Legacy/Reference SQL scripts
+│   │       └── feedDB.sql
+│   ├── api/                         # API Specification docs
+│   │   └── graphql.md               # GraphQL Integration details
+│   └── monitoring/                  # Cross-cutting concerns docs
+│       └── aop.md                   # Logging & Monitoring details
 ├── src/main/java/com/amalitech/blogging_platform/
 │   ├── BloggingPlatformApplication.java # Spring Boot Entry Point
 │   ├── aspect/                      # AOP Aspects (Logging, Performance)
@@ -93,6 +116,7 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 │   ├── exceptions/                  # Global Exception Handlers
 │   ├── model/                       # JPA Entity Definitions
 │   ├── repository/                  # Spring Data Repositories
+│   ├── security/                    # Spring Security, JWT, & OAuth2 Filter
 │   └── service/                     # Business Logic & Transactions
 ├── src/main/resources/              # Assets & Configuration
 │   ├── db/
@@ -110,15 +134,17 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 ## Tech Stack & Dependencies
 
 ### Core Technologies
-- **Framework**: Spring Boot 3.x (Spring Data JPA, Spring Cache)
+- **Framework**: Spring Boot 4.0.2 (**OAuth2 Client**, Spring Data JPA, Spring Cache)
 - **Language**: Java 21
 - **Database**: PostgreSQL 16+
 - **API**: REST (OpenAPI) & GraphQL
-- **Security**: Argon2 JVM
+- **Security**: **JWT (JJWT)**, **Argon2**
 
 ### Key Dependencies
-- **Spring Web / GraphQL / Validation / AOP / Data JPA / Cache**: Core Spring components.
+- **Spring Data JPA / Cache / Validation / AOP**: Core Spring components.
+- **Spring Security & OAuth2 Client**: Comprehensive security and social login.
 - **Flyway**: Database migration management and version control.
+- **JJWT**: Implementation for JWT creation and validation.
 - **Argon2 JVM**: For secure password hashing.
 - **Dotenv-Java**: For environment variable management.
 - **Lombok**: Boilerplate reduction.
@@ -158,11 +184,26 @@ To run with a specific profile:
    ```bash
    cp .env.example .env
    ```
-3. Update `.env` with your PostgreSQL credentials:
+3. Update `.env` with your PostgreSQL, Security, and CORS credentials:
    ```properties
+   # Database Configuration
    DB_URL=jdbc:postgresql://localhost:5432/blogging
    DB_USER=your_username
    DB_PASSWORD=your_password
+
+   # Security & JWT
+   JWT_SECRET=your_base64_secret_key
+   # JWT_EXPIRATION=3600000
+
+   # OAuth2 (Google)
+   GOOGLE_CLIENT_ID=your_client_id
+   GOOGLE_CLIENT_SECRET=your_client_secret
+
+   # CORS Configuration
+   CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
+   CORS_ALLOWED_HEADERS=Authorization,Content-Type,X-Requested-With
+   CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
+   CORS_ALLOW_CREDENTIALS=true
    ```
 
 ### 3. Database Initialization

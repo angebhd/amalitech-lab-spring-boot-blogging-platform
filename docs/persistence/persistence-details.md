@@ -6,7 +6,7 @@ The Blogging Platform leverages **Spring Data JPA** to abstract database operati
 
 Repositories extend `JpaRepository`, providing out-of-the-box CRUD operations, pagination, and sorting.
 
-- **`UserRepository`**: Manages user persistence and retrieval.
+- **`UserRepository`**: Manages user persistence, retrieval, and **Role** (ADMIN/USER) mappings.
 - **`PostRepository`**: Handles blog post operations, including complex feed queries.
 - **`CommentRepository`**: Manages comments associated with posts.
 - **`TagRepository`**: Handles post tagging and retrieval by tag name.
@@ -49,6 +49,14 @@ Page<Post> findAll(Pageable page);
 
 ### 2. Projections
 Interface-based projections (`PostWithStatsProjection`) are used to return only the necessary data from complex native queries, reducing memory footprint.
+
+---
+
+## 4. Performance & Caching
+
+The application integrates with **Spring Cache** to optimize read-heavy operations. Detailed analysis can be found in:
+- **[Caching Strategy](caching.md)**: Implementation of `@Cacheable` and logic for invalidation.
+- **[Performance Report](performance-report.md)**: Side-by-side benchmarks of JPA and Cache optimizations.
 
 ## Transaction Management
 
