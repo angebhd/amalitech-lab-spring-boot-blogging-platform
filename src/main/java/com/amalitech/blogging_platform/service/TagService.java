@@ -32,7 +32,7 @@ public class TagService {
     return new PaginatedData<>(this.tagRepository.findAll(page).map(TagDTO.Converter::toDTO));
   }
 
-  List<Tag> getOrCreateTags(List<String> tagNames) {
+  public List<Tag> getOrCreateTags(List<String> tagNames) {
 
     if (tagNames == null || tagNames.isEmpty())
       return List.of();

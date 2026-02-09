@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class PostService {
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
   private final ReviewRepository reviewRepository;
+  private static final String POST_NOT_FOUND = "Post not Found";
 
   @Autowired
   public PostService(PostRepository postRepository, UserRepository userRepository, TagService tagService,
@@ -74,7 +76,7 @@ public class PostService {
     if (post.getTags().size() > 5)
       throw new BadRequestException("Post cannot have more than 5 tags");
 
-    Post oldPost = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Post not found"));
+    Post oldPost = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(POST_NOT_FOUND));
     if(post.getTitle() != null)
       oldPost.setTitle(post.getTitle());
     if (oldPost.getBody() != null)
@@ -88,10 +90,11 @@ public class PostService {
     return this.mapToDTO(this.postRepository.save(oldPost));
   }
 
+  @Async
   @Transactional
   @CacheEvict(cacheNames = {"posts"}, key = "#id")
   public void delete(Long id){
-    Post post = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Post not found"));
+    Post post = this.postRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(POST_NOT_FOUND));
     this.reviewRepository.deleteByPost(post);
     this.commentRepository.deleteByPost(post);
     this.postRepository.delete(post);
@@ -114,10 +117,8 @@ public class PostService {
   }
   @Cacheable(cacheNames = "posts", key = "#id")
   public PostDTO.Out get(Long id){
-    return this.postRepository.findById(id).map(this::mapToDTO).orElseThrow( () -> new RessourceNotFoundException("Post not found"));
+    return this.postRepository.findById(id).map(this::mapToDTO).orElseThrow( () -> new RessourceNotFoundException(POST_NOT_FOUND));
   }
-
-
 
   public PaginatedData<PostDTO.Out> getByAuthorId(Long id, Pageable pageable){
       return new PaginatedData<>(postRepository.findByAuthor_Id(id, pageable).map(this::mapToDTO));

@@ -55,6 +55,17 @@ public class UserDTO {
     private boolean isDeleted;
   }
 
+  @Schema(name = "UserStat", description = "User statistics")
+  public record UserStat(
+          @Schema(name = "Posts", description = "Number of posts")
+          Long posts,
+          @Schema(name = "comments", description = "Number of comments")
+          Long comments,
+          @Schema(name = "reviews", description = "Reviews made")
+          Long  reviews,
+          @Schema(name = "postReviews", description = "Average of post reviews")
+          Float postReviews){}
+
   public static class Converter{
     public static Out toDTO(User user){
       Out out = new Out();

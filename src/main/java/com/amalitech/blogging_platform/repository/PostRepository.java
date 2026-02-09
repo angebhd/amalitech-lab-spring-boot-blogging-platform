@@ -142,5 +142,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
           nativeQuery = true
   )
   Page<PostWithStatsProjection> searchWithStats(@Param("keyword") String keyword, Pageable pageable);
-
+long countByAuthor(User author);
 }

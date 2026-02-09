@@ -4,6 +4,8 @@ import com.amalitech.blogging_platform.dto.PaginatedData;
 import com.amalitech.blogging_platform.dto.UserDTO;
 import com.amalitech.blogging_platform.exceptions.DataConflictException;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
+import com.amalitech.blogging_platform.model.EReview;
+import com.amalitech.blogging_platform.model.Review;
 import com.amalitech.blogging_platform.model.User;
 import com.amalitech.blogging_platform.model.UserRole;
 import com.amalitech.blogging_platform.repository.CommentRepository;
@@ -15,9 +17,13 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UserService {
@@ -26,7 +32,7 @@ public class UserService {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final ReviewRepository reviewRepository;
-  private static final String USERNOTFOUNDMESSAGE = "User not found";
+  private static final String USER_NOT_FOUND_MESSAGE = "User not found";
 
   public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PostRepository postRepository,
                      CommentRepository commentRepository, ReviewRepository reviewRepository) {
@@ -51,19 +57,33 @@ public class UserService {
 
   @Cacheable(cacheNames = "users", key = "#id")
   public UserDTO.Out get(Long id){
-    User response = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    User response = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     return this.mapToUserDTO(response);
   }
 
   @Cacheable(cacheNames = "usersByUsername",  key = "#username.toLowerCase()")
   public UserDTO.Out getByUsername(String username){
-    var response = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    var response = userRepository.findByUsernameIgnoreCase(username).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     return this.mapToUserDTO(response);
   }
 
   public PaginatedData<UserDTO.Out> get(Pageable pageable){
    return new PaginatedData<>(this.userRepository.findAll(pageable).map(UserDTO.Converter::toDTO));
+  }
 
+
+  @Async
+  public CompletableFuture<UserDTO.UserStat> userStats(Long userId){
+    var user = this.userRepository.findById(userId).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
+
+    CompletableFuture<Long> posts = CompletableFuture.supplyAsync(() -> this.postRepository.countByAuthor(user));
+    CompletableFuture<Long> comments = CompletableFuture.supplyAsync(() -> this.commentRepository.countByUser(user));
+    CompletableFuture<Long> reviews = CompletableFuture.supplyAsync(() -> this.reviewRepository.countByUser(user));
+    CompletableFuture<List<Review>> postReviews = CompletableFuture.supplyAsync(() -> reviewRepository.findByUser(user));
+
+    return CompletableFuture.allOf(posts, comments, reviews, postReviews).thenApply( res ->
+            new UserDTO.UserStat(posts.join(), comments.join(), reviews.join(), this.averageReview(postReviews.join()))
+            );
   }
 
 
@@ -77,7 +97,7 @@ public class UserService {
           }
   )
   public UserDTO.Out update(Long id, UserDTO.In user){
-    User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    User oldUser = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     user.setPassword(oldUser.getPassword());
 
     if (user.getEmail() != null && !user.getEmail().equals(oldUser.getEmail())) {
@@ -98,13 +118,13 @@ public class UserService {
   }
 
   public UserDTO.Out makeAdmin(long id){
-    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     user.setRole(UserRole.ADMIN);
     return this.mapToUserDTO(this.userRepository.save(user));
   }
 
   public UserDTO.Out removeAdmin(long id){
-    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     user.setRole(UserRole.USER);
     return this.mapToUserDTO(this.userRepository.save(user));
   }
@@ -118,7 +138,7 @@ public class UserService {
           }
   )
   public void delete (Long id){
-    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USERNOTFOUNDMESSAGE));
+    User user = this.userRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(USER_NOT_FOUND_MESSAGE));
     this.commentRepository.deleteByUser(user);
     this.postRepository.deleteByAuthor(user);
     this.reviewRepository.deleteByUser(user);
@@ -161,6 +181,25 @@ public class UserService {
     out.setDeletedAt(user.getDeletedAt());
     out.setDeleted(user.isDeleted());
     return out;
+  }
+
+  private float averageReview(List<Review> reviews){
+    return (reviews.stream()
+            .map(r -> this.mapReviewNumber(EReview.valueOf(r.getRate())))
+            .reduce(Float::sum)
+            .orElse(0f)) / reviews.size();
+
+  }
+
+  private float mapReviewNumber(EReview review){
+    return switch (review){
+      case EReview.ONE -> 1;
+      case EReview.TWO -> 2;
+      case EReview.THREE -> 3;
+      case EReview.FOUR -> 4;
+      case EReview.FIVE -> 5;
+      default -> 0;
+    };
   }
 
 

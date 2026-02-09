@@ -76,6 +76,19 @@ public class UserController {
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
+  @GetMapping("/stats/{userId}")
+  @Operation(summary = "Get a specific user by username")
+  @ApiResponse(responseCode= "200", description = "User retrieved")
+  @ApiResponse(responseCode= "401", description = "Authentication failed, please login and send a correct token", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "403", description = "You don't have the right to do these operation", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "404", description = "User not found", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "409", description = "Invalid data", content = @Content(mediaType = "application/json", schema = @Schema()))
+  @ApiResponse(responseCode= "500", description = "Internal server error, please let the backend developer know if it occurred", content = @Content(mediaType = "application/json", schema = @Schema()))
+  public ResponseEntity<GenericResponse<UserDTO.UserStat>> getStats(@PathVariable Long userId){
+    GenericResponse<UserDTO.UserStat> response = new GenericResponse<>(HttpStatus.OK, this.userService.userStats(userId).join());
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
   @PostMapping()
   @Operation(summary = "Create a new user")
   @PreAuthorize("hasRole('ADMIN')")
