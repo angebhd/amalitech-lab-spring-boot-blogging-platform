@@ -3,7 +3,7 @@ spring:
   application:
     name: Blogging platform
   config:
-    import: file:.env[.properties]
+    import: optional:file:.env[.properties]
   profiles:
     active: dev
   graphql:

@@ -31,7 +31,7 @@ public class CommentService {
   private final PostRepository postRepository;
   private final UserRepository userRepository;
   private final ModerationService moderationService;
-  private static final String COMMENT_NOT_FOUND = "Comment not fount";
+  private static final String COMMENT_NOT_FOUND = "Comment not found";
 
   @Autowired
   public CommentService(CommentRepository commentRepository, PostRepository postRepository,
