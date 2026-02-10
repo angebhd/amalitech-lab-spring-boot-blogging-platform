@@ -30,12 +30,16 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
   private final UserRepository userRepository;
+  private final ModerationService moderationService;
+  private static final String COMMENT_NOT_FOUND = "Comment not fount"
 
   @Autowired
-  public CommentService(CommentRepository commentRepository, PostRepository postRepository, UserRepository userRepository){
+  public CommentService(CommentRepository commentRepository, PostRepository postRepository,
+                        UserRepository userRepository, ModerationService moderationService){
     this.commentRepository = commentRepository;
     this.postRepository = postRepository;
     this.userRepository = userRepository;
+    this.moderationService = moderationService;
   }
 
   /**
@@ -58,7 +62,7 @@ public class CommentService {
    */
   @Cacheable(cacheNames = "comments", key = "#id")
   public CommentDTO.Out get(Long id){
-    return this.commentRepository.findById(id).map(this::mapToDTO).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
+    return this.commentRepository.findById(id).map(this::mapToDTO).orElseThrow(() -> new RessourceNotFoundException(COMMENT_NOT_FOUND));
   }
 
   /**
@@ -105,7 +109,9 @@ public class CommentService {
     }
     comment.setPost(post);
     comment.setUser(user);
-    return  this.mapToDTO(this.commentRepository.save(comment));
+    Comment savedComment = this.commentRepository.save(comment);
+    this.moderationService.validateComment(savedComment);
+    return  this.mapToDTO(savedComment);
   }
 
   /**
@@ -118,9 +124,11 @@ public class CommentService {
    */
   @CachePut(cacheNames = "comments", key = "#id")
   public CommentDTO.Out update (Long id, String body){
-    Comment old = this.commentRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException("Comment not found"));
+    Comment old = this.commentRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(COMMENT_NOT_FOUND));
     old.setBody(body);
-    return this.mapToDTO(this.commentRepository.save(old));
+    Comment savedComment = this.commentRepository.save(old);
+    this.moderationService.validateComment(savedComment);
+    return this.mapToDTO(savedComment);
   }
 
   /**
@@ -131,7 +139,7 @@ public class CommentService {
   @Transactional
   @CacheEvict(cacheNames = "comments", key = "#id")
   public void delete (Long id){
-    Comment comment = this.commentRepository.findById(id).orElseThrow(() -> new DataConflictException("Comment not found"));
+    Comment comment = this.commentRepository.findById(id).orElseThrow(() -> new DataConflictException(COMMENT_NOT_FOUND));
     if(!comment.getChildren().isEmpty()){
       commentRepository.deleteAllByIdInBatch(comment.getChildren().stream().map(BaseEntity::getId).toList());
     }

@@ -39,20 +39,23 @@ public class PostService {
   private final UserRepository userRepository;
   private final CommentRepository commentRepository;
   private final ReviewRepository reviewRepository;
+  private final ModerationService moderationService;
   private static final String POST_NOT_FOUND = "Post not Found";
 
   @Autowired
   public PostService(PostRepository postRepository, UserRepository userRepository, TagService tagService,
-                     CommentRepository commentRepository, ReviewRepository reviewRepository) {
+                     CommentRepository commentRepository, ReviewRepository reviewRepository, ModerationService moderationService) {
     this.postRepository = postRepository;
     this.userRepository = userRepository;
     this.tagService = tagService;
     this.commentRepository = commentRepository;
     this.reviewRepository = reviewRepository;
+    this.moderationService = moderationService;
+
   }
 
   @Transactional
-  @CachePut(cacheNames = "posts", key = "#result.id")
+//  @CachePut(cacheNames = "posts", key = "#result.id")
   public PostDTO.Out create(PostDTO.In postIn){
     Post post = this.mapToEntity(postIn);
 
@@ -66,7 +69,7 @@ public class PostService {
     post.setTags(tags);
     post.setAuthor(author);
     Post savedPost =  this.postRepository.save(post);
-
+    this.moderationService.validatePost(savedPost);
     return  this.mapToDTO(savedPost);
   }
 
@@ -87,7 +90,9 @@ public class PostService {
       oldPost.setTags(tags);
     }
 
-    return this.mapToDTO(this.postRepository.save(oldPost));
+    Post savedPost = this.postRepository.save(oldPost);
+    this.moderationService.validatePost(savedPost);
+    return this.mapToDTO(savedPost);
   }
 
   @Async

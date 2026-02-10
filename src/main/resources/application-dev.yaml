@@ -58,6 +58,7 @@ logging:
     org.springframework.boot.actuate.autoconfigure: TRACE
     org.springframework.boot.web.servlet.context: DEBUG
     org.springframework.context: DEBUG
+    com.zaxxer.hikari: INFO
 
 
 app:
