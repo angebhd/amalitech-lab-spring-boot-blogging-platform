@@ -4,6 +4,8 @@ services:
     container_name: blogging-platform
     ports:
       - "8080:8080"
+    env_file:
+      - .env.docker
 
   prometheus:
     image: prom/prometheus:latest
