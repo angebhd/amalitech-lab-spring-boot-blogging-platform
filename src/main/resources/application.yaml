@@ -16,3 +16,10 @@ springdoc:
   swagger-ui:
     enable: false
 
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ["prometheus"]

@@ -54,8 +54,8 @@ logging:
   level:
     org.springframework.security: DEBUG
     com.amalitech.blogging_platform.config: DEBUG
-    org.springframework.boot.actuate: TRACE
-    org.springframework.boot.actuate.autoconfigure: TRACE
+    org.springframework.boot.actuate: INFO
+    org.springframework.boot.actuate.autoconfigure: DEBUG
     org.springframework.boot.web.servlet.context: DEBUG
     org.springframework.context: DEBUG
     com.zaxxer.hikari: INFO
@@ -84,4 +84,3 @@ management:
     web:
       exposure:
         include: "*"
-        exclude: "env,beans"
