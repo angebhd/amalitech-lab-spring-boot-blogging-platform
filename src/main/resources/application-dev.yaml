@@ -70,6 +70,13 @@ app:
     allowed-headers: ${CORS_ALLOWED_HEADERS}
     allowed-methods: ${CORS_ALLOWED_METHODS}
     allow-credentials: ${CORS_ALLOW_CREDENTIALS}
+  admin:
+    email: ${SYSTEM_ADMIN_EMAIL}
+    username: ${SYSTEM_ADMIN_USERNAME}
+    password: ${SYSTEM_ADMIN_PASSWORD}
+    first-name: ${SYSTEM_ADMIN_FIRSTNAME}
+    last-name: ${SYSTEM_ADMIN_LASTNAME}
+
 
 
 management:
