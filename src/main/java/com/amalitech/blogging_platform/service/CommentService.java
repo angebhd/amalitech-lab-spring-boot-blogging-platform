@@ -110,7 +110,7 @@ public class CommentService {
     comment.setPost(post);
     comment.setUser(user);
     Comment savedComment = this.commentRepository.save(comment);
-    this.moderationService.validateComment(savedComment);
+    this.moderationService.validateComment(savedComment.getId());
     return  this.mapToDTO(savedComment);
   }
 
@@ -127,7 +127,7 @@ public class CommentService {
     Comment old = this.commentRepository.findById(id).orElseThrow(() -> new RessourceNotFoundException(COMMENT_NOT_FOUND));
     old.setBody(body);
     Comment savedComment = this.commentRepository.save(old);
-    this.moderationService.validateComment(savedComment);
+    this.moderationService.validateComment(savedComment.getId());
     return this.mapToDTO(savedComment);
   }
 

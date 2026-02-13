@@ -1,7 +1,6 @@
 package com.amalitech.blogging_platform.service;
 
-import com.amalitech.blogging_platform.model.Comment;
-import com.amalitech.blogging_platform.model.Post;
+
 import com.amalitech.blogging_platform.repository.CommentRepository;
 import com.amalitech.blogging_platform.repository.PostRepository;
 import org.slf4j.Logger;
@@ -9,8 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class ModerationService {
   private final CommentRepository commentRepository;
   private final PostRepository postRepository;
@@ -27,8 +28,11 @@ public class ModerationService {
 
   @Async
   @CacheEvict(cacheNames = "comments", key = "#comment.id")
-  public void validateComment(Comment comment) {
+  public void validateComment(long commentId) {
+    var comment = this.commentRepository.findById(commentId).orElse(null);
+    if (comment == null) return;
     try {
+
       var isCommentValid = this.verifyText(comment.getBody());
       Thread.sleep(500);
       if (!isCommentValid) {
@@ -45,7 +49,9 @@ public class ModerationService {
 
   @Async
   @CacheEvict(cacheNames = "posts", key = "#post.id")
-  public void validatePost(Post post) {
+  public void validatePost(long postId) {
+    var post = this.postRepository.findById(postId).orElse(null);
+    if (post == null) return;
     try {
       var isCommentValid = this.verifyText(post.getBody());
       Thread.sleep(500);

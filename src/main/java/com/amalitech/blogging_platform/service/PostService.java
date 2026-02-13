@@ -69,7 +69,7 @@ public class PostService {
     post.setTags(tags);
     post.setAuthor(author);
     Post savedPost =  this.postRepository.save(post);
-    this.moderationService.validatePost(savedPost);
+    this.moderationService.validatePost(savedPost.getId());
     return  this.mapToDTO(savedPost);
   }
 
@@ -91,7 +91,7 @@ public class PostService {
     }
 
     Post savedPost = this.postRepository.save(oldPost);
-    this.moderationService.validatePost(savedPost);
+    this.moderationService.validatePost(savedPost.getId());
     return this.mapToDTO(savedPost);
   }
 
