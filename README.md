@@ -60,19 +60,20 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
   - **RBAC (Role-Based Access Control)**: Granular permissions using **ADMIN** and **USER** roles.
 - **Web Security Policies**:
   - **CORS (Cross-Origin Resource Sharing)**: Secure communication for React and JavaFX clients. Prevents unauthorized data reading across origins.
-  - **CSRF Protection**: Strategically implemented for stateful sessions and disabled for stateless APIs. Prevents unauthorized action execution by malicious sites.
-  - **CORS vs. CSRF**: While both address cross-origin security, CORS controls **who** can read data, whereas CSRF prevents **how** actions are triggered. In our stateless JWT model, the `Authorization` header provides inherent CSRF immunity as it cannot be automatically attached by browsers. [Technical Deep-dive](docs/security/cors-csrf.md).
+  - **CSRF Protection**: Documented as part of technical requirements (Lab 7) but explicitly **disabled** in the code. This is a secure choice for the project's **stateless JWT model**, as the `Authorization` header provides inherent protection against cross-site request forgery. [Security Deep-dive](docs/security/cors-csrf.md).
 - **Persistence & Performance**:
   - **Spring Data JPA**: Abstraction for cleaner data access code. [Read more](docs/persistence/persistence-details.md).
   - **Flyway Migrations**: Version-controlled database schema management.
   - **Spring Cache**: Improving read performance for popular posts and users. [Read more](docs/persistence/caching.md).
   - **Transaction Management**: Ensuring data consistency with `@Transactional`.
   - **Database-Level Pagination**: Efficient data retrieval using `Pageable`.
-- **Quality & Monitoring**:
-  - **Validation**: Strict input validation using Bean Validation.
+- **Quality, Monitoring & Infrastructure**:
+  - **Asynchronous Processing**: Non-blocking moderation and analytics using `@Async` and `CompletableFuture`. [Read more](docs/monitoring/optimizations.md).
+  - **Scheduled Maintenance**: Automated token blacklist cleanup using `@Scheduled`.
+  - **Observability Stack**: Real-time monitoring via **Prometheus** and **Grafana**.
+  - **Containerization**: Full stack orchestration using **Docker** and **Docker Compose**.
   - **AOP Monitoring**: Automated logging and performance tracking. [Read more](docs/monitoring/aop.md).
   - **Performance Benchmarking**: Detailed analysis of query and cache optimizations. [Read more](docs/persistence/performance-report.md).
-  - **OpenAPI Documentation**: Interactive API testing with Swagger UI.
 
 ---
 
@@ -80,10 +81,12 @@ In addition to REST, the platform offers a GraphQL API to provide clients with f
 
 For a deeper dive into specific components, refer to the comprehensive documentation modules:
 
+- **[Performance Analysis](docs/monitoring/performance-analysis.md)**: Baseline metrics, bottleneck identification (Epic 1), and VisualVM/JMeter reports.
 - **[Security Architecture](docs/security/security-details.md)**: JWT flows, Google OAuth2, Argon2 hashing, and Token Blacklisting.
 - **[Web Policies](docs/security/cors-csrf.md)**: CORS preflight handshakes and CSRF immunity strategy.
 - **[Persistence Layer](docs/persistence/persistence-details.md)**: JPA repositories, Custom Native SQL, and Flyway.
 - **[Performance & Caching](docs/persistence/caching.md)**: Spring Cache strategy and **[Optimization Benchmarks](docs/persistence/performance-report.md)**.
+- **[Advanced Optimizations](docs/monitoring/optimizations.md)**: Asynchronous processing, scheduling, and monitoring infrastructure.
 - **[API Specification](docs/api/graphql.md)**: GraphQL schema definitions and resolver logic.
 - **[Monitoring & AOP](docs/monitoring/aop.md)**: Automated logging and performance aspects.
 
@@ -106,8 +109,14 @@ For a deeper dive into specific components, refer to the comprehensive documenta
 │   │       └── feedDB.sql
 │   ├── api/                         # API Specification docs
 │   │   └── graphql.md               # GraphQL Integration details
-│   └── monitoring/                  # Cross-cutting concerns docs
-│       └── aop.md                   # Logging & Monitoring details
+│   └── monitoring/                  # Monitoring & Infrastructure docs
+│       ├── aop.md                   # Logging & Monitoring details
+│       ├── optimizations.md         # Async, Scheduling, & Docker configuration
+│       ├── performance-analysis.md  # Epic 1 Bottleneck identification
+│       └── images/                  # Performance & Monitoring screenshots
+├── monitoring/                       # Prometheus & Grafana configuration
+├── Dockerfile                        # Backend containerization
+└── docker-compose.yml                # Full stack orchestration
 ├── src/main/java/com/amalitech/blogging_platform/
 │   ├── BloggingPlatformApplication.java # Spring Boot Entry Point
 │   ├── aspect/                      # AOP Aspects (Logging, Performance)
@@ -220,6 +229,19 @@ To run with a specific profile:
 ```bash
 ./mvnw spring-boot:run
 ```
+
+### 5. Running with Docker Compose
+
+For a complete production-like environment (including Monitoring), ensure you have Docker and Docker Compose installed:
+
+1. Build and start the services:
+   ```bash
+   docker-compose up --build
+   ```
+2. Access the services:
+   - **API**: `http://localhost:8080`
+   - **Prometheus**: `http://localhost:9090`
+   - **Grafana**: `http://localhost:3000` (Default: admin/admin)
 
 - **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - **GraphiQL**: [http://localhost:8080/graphiql](http://localhost:8080/graphiql)

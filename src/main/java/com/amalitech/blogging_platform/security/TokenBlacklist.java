@@ -2,6 +2,8 @@ package com.amalitech.blogging_platform.security;
 
 import com.amalitech.blogging_platform.dto.BlacklistedTokenInfo;
 import com.amalitech.blogging_platform.exceptions.RessourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 public class TokenBlacklist {
 
   private final ConcurrentMap<String, Instant> blacklist = new ConcurrentHashMap<>();
+  private final Logger logger = LoggerFactory.getLogger(TokenBlacklist.class);
 
   public void add(String token, Instant expiry) {
     blacklist.put(token, expiry);
@@ -48,6 +51,7 @@ public class TokenBlacklist {
 
   @Scheduled(fixedRate = 600_000)
   public void cleanup() {
+    this.logger.info("Cleaning up blacklisted tokens");
     blacklist.entrySet().removeIf(e -> Instant.now().isAfter(e.getValue()));
   }
 
