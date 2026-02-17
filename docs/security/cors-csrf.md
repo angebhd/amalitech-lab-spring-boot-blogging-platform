@@ -1,6 +1,6 @@
 # CORS & CSRF Policies
 
-This document details the cross-origin communication rules and CSRF protection strategies implemented in the Blogging Platform.
+This document details the cross-origin communication rules and the theoretical CSRF protection strategies documented for Lab 7. Note that CSRF is explicitly disabled in the current stateless JWT implementation.
 
 ---
 
