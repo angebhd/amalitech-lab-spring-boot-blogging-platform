@@ -22,7 +22,7 @@ public class UserGController {
     this.userService = userService;
   }
   @QueryMapping
-  public PaginatedData<UserDTO.Out> users(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+  public PaginatedData<UserDTO.Out> users(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
     return this.userService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }
   @QueryMapping

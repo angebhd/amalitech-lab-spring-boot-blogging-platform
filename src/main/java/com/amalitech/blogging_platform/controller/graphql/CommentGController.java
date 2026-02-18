@@ -34,7 +34,7 @@ public class CommentGController {
    * @return paginated comments
    */
   @QueryMapping
-  public PaginatedData<CommentDTO.Out> comments(@Argument int page, @Argument int size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
+  public PaginatedData<CommentDTO.Out> comments(@Argument Integer page, @Argument Integer size, @Argument List<GraphQLPageableBuilder.SortInput> sortBy) {
 
     return this.commentService.get(GraphQLPageableBuilder.get(page, size, sortBy));
   }

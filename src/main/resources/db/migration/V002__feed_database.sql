@@ -7,11 +7,11 @@ VALUES
 
 INSERT INTO tags (name)
 VALUES
-('java'),
-('spring'),
-('postgres'),
-('backend'),
-('tutorial');
+('JAVA'),
+('SPRING'),
+('POSTGRES'),
+('BACKEND'),
+('TUTORIAL');
 
 INSERT INTO posts (author_id, title, body)
 VALUES
